@@ -15,7 +15,7 @@ import org.utl.idgs.model.Movimiento;
 
 /**
  *
- * @author Alda
+ * @author Jorge
  */
 public class ControllerUsuario {
     public Usuario login(String usuario, String contrasenia) throws SQLException{
@@ -92,6 +92,27 @@ public class ControllerUsuario {
         connMySQL.close();
 
         return usuario;
+    }
+    
+    public Usuario getUsuario(int filtro) throws Exception {
+        String sql = "SELECT * FROM v_usuario WHERE idUsuario ="+filtro+";" ;
+
+        ConexionMySQL connMySQL = new ConexionMySQL(); 
+
+        Connection conn = connMySQL.open();
+
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+
+        ResultSet rs = pstmt.executeQuery();
+        Usuario usuarios = new Usuario();
+
+        while (rs.next()) {
+            usuarios = fill(rs);
+        }
+        rs.close();
+        pstmt.close();
+        connMySQL.close();
+        return usuarios;
     }
 
     
