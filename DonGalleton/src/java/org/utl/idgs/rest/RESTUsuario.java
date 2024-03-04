@@ -1,6 +1,7 @@
 package org.utl.idgs.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.core.Context;
@@ -19,69 +20,64 @@ import org.utl.idgs.model.Usuario;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.utl.idgs.core.ControllerMateriaPrima;
-import org.utl.idgs.model.MateriaPrima;
 
 @Path("log")
 public class RESTUsuario {
+    private static final Set<String> ALLOWED_IPS = new HashSet<>();
+    static {
+        ALLOWED_IPS.add("192.168.137.196"); 
+       ALLOWED_IPS.add("192.168.137.227");
+       ALLOWED_IPS.add("127.0.0.1");
+    }
 
     @Path("in")
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response login(@FormParam("datos") @DefaultValue("") String datos) throws Exception {
+    public Response login(@Context HttpServletRequest request, @FormParam("datos") String datos) throws Exception {
         String out = null;
         Gson gson = new Gson();
         Usuario u = new Usuario();
         ControllerUsuario cu = new ControllerUsuario();
-
+        
         try {
             u = gson.fromJson(datos, Usuario.class);
 
             if (u == null) {
-                out = """
-                      {"error": "Debe ingresar usuario y contraseña para continuar."}
-                      """;
+                out = "{\"error\": \"Debe ingresar usuario y contraseña para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
-            if (u.getNombreUsuario() == null || u.getNombreUsuario() == "") {
-                out = """
-                      {"error": "Ingrese su nombre de usuario para continuar."}
-                      """;
+            if (u.getNombreUsuario() == null || u.getNombreUsuario().isEmpty()) {
+                out = "{\"error\": \"Ingrese su nombre de usuario para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
-            if (u.getContrasenia() == null || u.getContrasenia() == "") {
-                out = """
-                      {"error": "Ingrese su contraseña para continuar."}
-                      """;
+            if (u.getContrasenia() == null || u.getContrasenia().isEmpty()) {
+                out = "{\"error\": \"Ingrese su contraseña para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
 
             u = cu.login(u.getNombreUsuario(), u.getContrasenia());
 
             if (u == null) {
-                out = """
-                      {"error": "Usuario no encontrado, revise su usuario y contraseña."}
-                      """;
+                out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
             } else {
                 if (u.getEstatus() == 1) {
                     out = gson.toJson(u);
                 } else {
-                    out = """
-                        {"error": "El usuario esta inactivo."}
-                    """;
+                    out = "{\"error\": \"El usuario está inactivo.\"}";
                 }
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            out = """
-                  {"exception": "%s"}
-                  """;
-            out = String.format(out, ex.getMessage());
+            out = "{\"exception\": \"" + ex.getMessage() + "\"}";
         }
-
-        return Response.status(Response.Status.OK).entity(out).build();
-
+        
+        String clientIP = request.getRemoteAddr();
+        if (!ALLOWED_IPS.contains(clientIP)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("{\"error\": \"Acceso no autorizado desde esta dirección IP.\"}").build();
+        }
+        
+        return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
     }
 
     @GET
@@ -102,60 +98,36 @@ public class RESTUsuario {
         return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
 
     }
-//@Path("log")
-//public class RESTUsuario {
-////    private static final Set<String> ALLOWED_IPS = new HashSet<>();
-////    static {
-////        //ALLOWED_IPS.add("192.168.137.196"); //Jorge
-////        //ALLOWED_IPS.add("192.168.137.227"); //Diego
-////    }
-////
-////    @Path("in")
-////    @Produces(MediaType.APPLICATION_JSON)
-////    @POST
-////    public Response login(@Context HttpServletRequest request, @FormParam("datos") String datos) throws Exception {
-////        String out = null;
-////        Gson gson = new Gson();
-////        Usuario u = new Usuario();
-////        ControllerUsuario cu = new ControllerUsuario();
-////        
-////        try {
-////            u = gson.fromJson(datos, Usuario.class);
-////
-////            if (u == null) {
-////                out = "{\"error\": \"Debe ingresar usuario y contraseña para continuar.\"}";
-////                return Response.status(Response.Status.OK).entity(out).build();
-////            }
-////            if (u.getNombreUsuario() == null || u.getNombreUsuario().isEmpty()) {
-////                out = "{\"error\": \"Ingrese su nombre de usuario para continuar.\"}";
-////                return Response.status(Response.Status.OK).entity(out).build();
-////            }
-////            if (u.getContrasenia() == null || u.getContrasenia().isEmpty()) {
-////                out = "{\"error\": \"Ingrese su contraseña para continuar.\"}";
-////                return Response.status(Response.Status.OK).entity(out).build();
-////            }
-////
-////            u = cu.login(u.getNombreUsuario(), u.getContrasenia());
-////
-////            if (u == null) {
-////                out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
-////            } else {
-////                if (u.getEstatus() == 1) {
-////                    out = gson.toJson(u);
-////                } else {
-////                    out = "{\"error\": \"El usuario está inactivo.\"}";
-////                }
-////            }
-////        } catch (Exception ex) {
-////            ex.printStackTrace();
-////            out = "{\"exception\": \"" + ex.getMessage() + "\"}";
-////        }
-////        
-////        String clientIP = request.getRemoteAddr();
-////        if (!ALLOWED_IPS.contains(clientIP)) {
-////            return Response.status(Response.Status.FORBIDDEN).entity("{\"error\": \"Acceso no autorizado desde esta dirección IP.\"}").build();
-////        }
-//
-//        return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
-//    }
+    
+    @Path("getUsuario")
+    @POST 
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsuario(@FormParam("datoUsuario") @DefaultValue("") String datoUsuario){
+        String out = null;
+        Gson gson = new Gson();
+        Usuario u = null;
+        ControllerUsuario cu = new ControllerUsuario();
+        try 
+        {
+            u = gson.fromJson(datoUsuario, Usuario.class);
+            Usuario user = cu.getUsuario(u.getIdUsuario());
+            out = gson.toJson(user);
+        }
+        catch (JsonParseException jpe)
+        {
+            jpe.printStackTrace();
+            out = """
+                  {"exception":"Formato JSON de Datos Incorrectos."}
+                  """;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            out ="""
+                 {"exception":"%s"}
+                 """;
+            out = String.format(out, e.toString());
+        }
+        return Response.status(Response.Status.OK).entity(out).build();
+    }
 }
