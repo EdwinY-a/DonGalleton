@@ -2,6 +2,45 @@ export function inicializar() {
     getAll();
 }
 
+export function getUsuario(){
+    let usuario = new Object();
+    let datos = null;
+    let params = null;
+    var currentUserData = sessionStorage.getItem('currentUser');
+    var currentUser = JSON.parse(currentUserData);    
+    usuario.idUsuario = currentUser['idUsuario'];
+    
+    datos = {
+        datoUsuario: JSON.stringify(usuario) 
+        };
+        
+    params = new URLSearchParams(datos);
+    $.ajax({
+    url:"../../api/log/getUsuario",
+    type: "POST",
+    data: params.toString(),
+    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+    success: function(response){
+        let data = response;
+        if(data.error){
+            Swal.fire('', data.error, 'warning');
+            ocultarCargando();
+            activarAyudas();
+            limpiar();
+        } else if(data.exception){
+            Swal.fire('', "Error interno del servidor. Intente mas tarde.", 'error');
+            ocultarCargando();
+            activarAyudas();
+            limpiar();
+        } else{            
+            
+            ocultarCargando();
+        }
+    }
+});
+}
+
+
 export function guardarMateriaPrima() {
 
     let datos = null;
@@ -241,7 +280,17 @@ export function cargarTabla(data) {
         retrieve: true
     });
 
+    var currentUserData = sessionStorage.getItem('currentUser');
+    var currentUser = JSON.parse(currentUserData);    
 
+    if (currentUser['rol'] === 'administrador') {
+        $('.btnEliminar').show();
+        $('.btnEditar').show();
+    } else {
+        $('.btnEliminar').hide();
+        $('.btnEditar').hide();
+    }
+    
     $('#agregarMaterialPrima').on('click', 'button', function () {
         $('#modalMaterialPrima').modal('show');
     });
