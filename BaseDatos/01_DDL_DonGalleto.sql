@@ -12,6 +12,7 @@ CREATE DATABASE IF NOT EXISTS don_galleto;
 
 USE don_galleto;
 
+drop table if exists usuario;
 CREATE TABLE usuario(
 	idUsuario			INT NOT NULL PRIMARY KEY AUTO_INCREMENT,		-- 1
     nombreUsuario		VARCHAR(45) NOT NULL DEFAULT "",				-- 2
@@ -19,6 +20,16 @@ CREATE TABLE usuario(
     rol					VARCHAR(30) NOT NULL,							-- 4
     estatus				INT NOT NULL DEFAULT 1							-- 5
 );
+
+drop table if exists logsUser;
+CREATE TABLE IF NOT EXISTS logsUser (
+    id 				INT AUTO_INCREMENT PRIMARY KEY,
+    fecha 			TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario 		VARCHAR(255) NOT NULL,
+    procedimiento 	VARCHAR(255) NOT NULL
+);
+
+SELECT * FROM logsUser;
 
 CREATE TABLE medida(
 	idMedida			INT NOT NULL PRIMARY KEY AUTO_INCREMENT,		-- 1

@@ -3,6 +3,7 @@ let moduloEstadoDeCuenta;
 let moduloPuntoDeVenta;
 let moduloInventario;
 let moduloUsuario;
+let moduloLogs;
 
 function inicializar(){
     cargarModuloPuntoDeVenta();
@@ -123,6 +124,27 @@ function cargarModuloUsuario(){
                 );
 }
 
+function cargarModuloLogs(){
+    fetch("../logs/vista_logs.html")
+            .then(
+                function(response){
+                    return response.text();
+                }
+            )
+                .then(
+                    function(html){
+                        document.getElementById("contenedorPrincipal").innerHTML = html;
+                        import("../logs/logsController.js")
+                                .then(
+                                    function(controller){
+                                        moduloLogs = controller;
+                                        moduloLogs.inicializar();
+                                    }
+                                );
+                    }
+                );
+}
+
 function cerrarSesion(){
         mostrarCargando();
         sessionStorage.removeItem('currentUser');
@@ -133,3 +155,31 @@ function cerrarSesion(){
 $("#cerrarSesion").click(function(){
     cerrarSesion();
 });
+
+let inactividadTimer;
+
+
+function cerrarSesionPorInactividad() {
+    mostrarCargando();
+    sessionStorage.removeItem('currentUser');
+
+    ocultarCargando();
+    Swal.fire('', "Sesión cerrada por inactividad.", 'info');
+    window.location.replace("../../index.html");
+}
+
+function reiniciarTimerInactividad() {
+    if (inactividadTimer) {
+        clearTimeout(inactividadTimer);
+    }
+    inactividadTimer = setTimeout(cerrarSesionPorInactividad, 60000);
+}
+
+function manejarInteraccionUsuario() {
+    reiniciarTimerInactividad();
+}
+
+document.addEventListener('mousemove', manejarInteraccionUsuario);
+document.addEventListener('keypress', manejarInteraccionUsuario);
+
+reiniciarTimerInactividad();

@@ -1,81 +1,43 @@
+let currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+let logsUsuario = currentUser.nombreUsuario;
+
 export function inicializar() {
     getAll();
+    ocultarContrasenia();
 }
 
-export function getUsuario(){
+export function guardarUsuario() {
+
+    let datos = null;
+    let params = null;
+
     let usuario = new Object();
-    let datos = null;
-    let params = null;
-    var currentUserData = sessionStorage.getItem('currentUser');
-    var currentUser = JSON.parse(currentUserData);    
-    usuario.idUsuario = currentUser['idUsuario'];
-    
-    datos = {
-        datoUsuario: JSON.stringify(usuario) 
-        };
+    usuario = {};
+
+    let idUsuario = parseInt(document.getElementById("txtIdUsuario").value.trim().length);
+    let idUsuarioEditar = parseInt(document.getElementById("txtIdUsuarioEditar").value.trim().length);
+    console.log("NORMARL " + idUsuario + "EDITAR " + idUsuarioEditar);
+    if (idUsuario === 0 && idUsuarioEditar === 0) {
+        usuario.idUsuario = 0;
+
+        usuario.nombreUsuario = sanitizar(document.getElementById("txtNombre").value);
+        usuario.contrasenia = sanitizar(document.getElementById("txtContraseña").value);
+        usuario.rol = sanitizar(document.getElementById("txtRol").value);
         
-    params = new URLSearchParams(datos);
-    $.ajax({
-    url:"../../api/log/getUsuario",
-    type: "POST",
-    data: params.toString(),
-    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-    success: function(response){
-        let data = response;
-        if(data.error){
-            Swal.fire('', data.error, 'warning');
-            ocultarCargando();
-            activarAyudas();
-            limpiar();
-        } else if(data.exception){
-            Swal.fire('', "Error interno del servidor. Intente mas tarde.", 'error');
-            ocultarCargando();
-            activarAyudas();
-            limpiar();
-        } else{            
-            
-            ocultarCargando();
-        }
-    }
-});
-}
-
-
-export function guardarMateriaPrima() {
-
-    let datos = null;
-    let params = null;
-
-    let materiaPrima = new Object();
-    materiaPrima.medida = {};
-
-    let idMateria = parseInt(document.getElementById("txtIdMateria").value.trim().length);
-    let idMateriaEditar = parseInt(document.getElementById("txtIdMateriaEditar").value.trim().length);
-    if (idMateria === 0 && idMateriaEditar === 0) {
-        materiaPrima.idUsuario = 0;
-
-        materiaPrima.nombreMateria = document.getElementById("txtNobreMaterial").value;
-        materiaPrima.fechaCompra = cambiarFormatoFecha(document.getElementById("txtFechaCompraMaterial").value);
-        materiaPrima.fechaVencimiento = cambiarFormatoFecha(document.getElementById("txtFechaVenciMaterial").value);
-        materiaPrima.cantidadExistentes = document.getElementById("txtCantidadMaterial").value;
-        materiaPrima.precioCompra = document.getElementById("txtPrecioCompra").value;
-        materiaPrima.porcentaje = document.getElementById("txtPorcentajeMaterial").value;
-        materiaPrima.medida.idMedida = document.getElementById("txtMedidaMaterial").value;
-
+        usuario.logsUser = logsUsuario;
+        
         datos = {
-            datosMateriaPrima: JSON.stringify(materiaPrima)
+            datosUsuario: JSON.stringify(usuario)
         };
 
         console.log("datos: " + datos);
         params = new URLSearchParams(datos);
         console.log(params);
-        fetch("../../api/mprima/save",
+        fetch("../../api/log/save",
                 {method: "POST",
-
                     headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
                     body: params
                 })
-
                 .then(response => {
                     return response.json();
                 })
@@ -99,33 +61,29 @@ export function guardarMateriaPrima() {
 
                     }
 
-                    Swal.fire('', 'Materia Prima registrada correctamente', 'success');
+                    Swal.fire('', 'Usuario registrado correctamente', 'success');
                     getAll();
                     clean();
-                    //$('#modalMaterialPrima').modal('hide');
-                    $('#modalMaterialPrima .btn-secondary').click();
+                    $('#modalUsuario .btn-secondary').click();
 
                 });
     } else {
-        let idMaterial = parseInt(document.getElementById("txtIdMateriaEditar").value);
-        materiaPrima.idUsuario = idMaterial;
+        //let idUsuarioEditar = parseInt(document.getElementById("txtIdUsuarioEditar").value);
+        usuario.idUsuario = idUsuarioEditar;
 
-        materiaPrima.nombreMateria = document.getElementById("txtNobreMaterialEditar").value;
-        materiaPrima.fechaCompra = cambiarFormatoFecha(document.getElementById("txtFechaCompraMaterialEditar").value);
-        materiaPrima.fechaVencimiento = cambiarFormatoFecha(document.getElementById("txtFechaVenciMaterialEditar").value);
-        materiaPrima.cantidadExistentes = document.getElementById("txtCantidadMaterialEditar").value;
-        materiaPrima.precioCompra = document.getElementById("txtPrecioCompraEditar").value;
-        materiaPrima.porcentaje = document.getElementById("txtPorcentajeMaterialEditar").value;
-        materiaPrima.medida.idMedida = document.getElementById("txtMedidaMaterialEditar").value;
+        usuario.nombreUsuario = sanitizar(document.getElementById("txtNombreEditar").value);
+        usuario.contrasenia = sanitizar(document.getElementById("txtContraseñaEditar").value);
+        usuario.rol = sanitizar(document.getElementById("txtRolEditar").value);
+        usuario.logsUser = logsUsuario;
 
         datos = {
-            datosMateriaPrima: JSON.stringify(materiaPrima)
+            datosUsuario: JSON.stringify(usuario)
         };
 
         console.log("datos: " + datos);
         params = new URLSearchParams(datos);
         console.log(params);
-        fetch("../../api/mprima/save",
+        fetch("../../api/log/save",
                 {method: "POST",
 
                     headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
@@ -155,101 +113,181 @@ export function guardarMateriaPrima() {
 
                     }
 
-                    Swal.fire('', 'Materia Prima actualizada correctamente', 'success');
+                    Swal.fire('', 'Usuario actualizado correctamente', 'success');
                     getAll();
                     clean();
-                    //$('#modalMateriaEditar').modal('hide');
-                    $('#modalMateriaEditar .btn-secondary').click();
+                    $('#modalUsuarioEditar .btn-secondary').click();
                 });
     }
 }
 
-export function editarProducto(data) {
+export function sanitizar(texto) {
+    for (var i = 0;
+    i < texto.length; i++) {
+        texto = texto.replace("(", "");
+        texto = texto.replace(")", "");
+        texto = texto.replace(";", "");
+        texto = texto.replace("'", "");
+        texto = texto.replace("/", "");
+        texto = texto.replace("-", "");
+        texto = texto.replace("*", "");
+        texto = texto.replace("%", "");
+        texto = texto.replace("<", "");
+        texto = texto.replace(">", "");
+        texto = texto.replace(" ", "");
+    }
+    return texto;
+}
+
+export function togglePasswordVisibility() {
+    var passwordField = document.getElementById("txtContraseña");
+    var toggleButton = document.getElementById("toggleButton");
+
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleButton.textContent = "Ocultar";
+    } else {
+        passwordField.type = "password";
+        toggleButton.textContent = "Mostrar";
+    }
+}
+
+export function togglePasswordVisibility2() {
+    var passwordField = document.getElementById("txtContraseñaEditar");
+    var toggleButton = document.getElementById("toggleButton");
+
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleButton.textContent = "Ocultar";
+    } else {
+        passwordField.type = "password";
+        toggleButton.textContent = "Mostrar";
+    }
+}
+
+document.getElementById('txtContraseña').addEventListener('input', function () {
+    var botonGuardar = document.getElementById('btnSaveUser');
+    botonGuardar.disabled = true;
+    var contrasena = this.value;
+    var condicionesContrasena = document.getElementById('condicionesContrasena');
+    var mensaje = '';
+
+    // Evaluar las condiciones de la contraseña
+    if (contrasena.length < 8) {
+        mensaje += 'La contraseña debe tener al menos 8 caracteres.<br>';
+    }
+    if (!/[A-Z]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos una letra mayúscula.<br>';
+    }
+    if (!/[a-z]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos una letra minúscula.<br>';
+    }
+    if (!/[0-9]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos un número.<br>';
+    }
+    if (!/[@#$^&_+[\]{}'"\\|,\?]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos un carácter especial (@#$^&_+[]{}\'"\\|,?).<br>';
+    }
+
+    condicionesContrasena.innerHTML = mensaje;
+
+    var botonGuardar = document.getElementById('btnSaveUser');
+    if (mensaje !== '') {
+        botonGuardar.disabled = true;
+    } else {
+        botonGuardar.disabled = false;
+    }
+});
+
+document.getElementById('txtContraseñaEditar').addEventListener('input', function () {
+    var botonGuardar = document.getElementById('btnEditarGalleta');
+    botonGuardar.disabled = true;
+    var contrasena = this.value;
+    var condicionesContrasena = document.getElementById('condicionesContrasenaEditar');
+    var mensaje = '';
+
+    // Evaluar las condiciones de la contraseña
+    if (contrasena.length < 8) {
+        mensaje += 'La contraseña debe tener al menos 8 caracteres.<br>';
+    }
+    if (!/[A-Z]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos una letra mayúscula.<br>';
+    }
+    if (!/[a-z]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos una letra minúscula.<br>';
+    }
+    if (!/[0-9]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos un número.<br>';
+    }
+    if (!/[@#$^&_+[\]{}'"\\|,\?]/.test(contrasena)) {
+        mensaje += 'La contraseña debe contener al menos un carácter especial (@#$^&_+[]{}\'"\\|,?).<br>';
+    }
+
+    condicionesContrasena.innerHTML = mensaje;
+
+    var botonGuardar = document.getElementById('btnEditarGalleta');
+    if (mensaje !== '') {
+        botonGuardar.disabled = true;
+    } else {
+        botonGuardar.disabled = false;
+    }
+});
+
+export function editarUsuario(data) {
     console.log("Editar", JSON.stringify(data));
-    $('#modalMateriaEditar').modal('show');
-    getProducto(data.idUsuario);
+    $('#modalUsuarioEditar').modal('show');
+    getUsuario(data.idUsuario);
 
 }
 
-function cambiarFormatoFecha(fechaIngresada) {
+export function ocultarContrasenia() {
+    var table = document.getElementById("tblUsuario");
+    var rows = table.getElementsByTagName("tr");
 
-    var fecha = new Date(fechaIngresada);
-
-    var dia = fecha.getDate();
-    var mes = fecha.getMonth() + 1;
-    var anio = fecha.getFullYear();
-
-    dia = dia < 10 ? '0' + dia : dia;
-    mes = mes < 10 ? '0' + mes : mes;
-
-    return dia + '/' + mes + '/' + anio;
-}
-
-function cambiarFormatoFechaTabla(fechaIngresada) {
-
-    var fecha = new Date(fechaIngresada);
-
-    var dia = fecha.getDate();
-    var mes = fecha.getMonth() + 1;
-    var anio = fecha.getFullYear();
-
-    dia = dia < 10 ? '0' + dia : dia;
-    mes = mes < 10 ? '0' + mes : mes;
-
-    return dia + '-' + mes + '-' + anio;
+    for (var i = 0; i < rows.length; i++) {
+        var cells = rows[i].getElementsByTagName("td");
+        for (var j = 0; j < cells.length; j++) {
+            if (cells[j].textContent === "Contraseña") {
+                cells[j].textContent = "********";
+            }
+        }
+    }
 }
 
 export function cargarTabla(data) {
     console.log(data);
 
-
-
-    $('#tblUsuario').on('click', '.btnEliminar', deleteProducto);
+    $('#tblUsuario').on('click', '.btnEliminar', deleteUsuario);
     $('#tblUsuario').on('click', '.btnEditar', function () {
-        // Obtener el índice de la fila seleccionada
         let rowIndex = $(this).closest('tr').index();
-
-        // Obtener los datos del producto específico
         let datos = data[rowIndex];
-
-        // Llamar a la función editarProducto con los datos del producto seleccionado
-        editarProducto(datos);
+        editarUsuario(datos);
     });
-    
-//    $(document).ready(function() {
-//    // Initialize DataTable
-//    $('#tblMateria').DataTable();
-//
-//    // Check if DataTable exists
-//    if ($.fn.DataTable.isDataTable('#tblMateria')) {
-//        // Destroy DataTable and empty tbody
-//        $('#tblMateria').DataTable().destroy();
-//        $('#tblMateria tbody').empty();
-//    }
-//});
-    
+
     // Destruye la tabla
     if ($.fn.DataTable.isDataTable('#tblUsuario')) {
         $('#tblUsuario').DataTable().destroy();
-        $('#tblUsuario tbody').empty();
+        $('#tblUsuario tbody').empty(); // Limpiar el contenido del tbody
     }
 
     // generar tabla dinamica
     for (let i = 0; i < data.length; i++) {
         let fila = `<tr>
-        <td>${data[i]['nombreUsuario']}</td>
-        <td>${data[i]['contrasenia']}</td>
-        <td>${data[i]['rol'] }</td>
-        <td><button data-idusuario="${data[i]['idUsuario']}" class="btnEliminar"><i class="fa-solid fa-trash" style="color: #c12525;"></i></button></td>
-        <td><button data-idusuario="${data[i]['idUsuario']}" id="btnEditar" class="btnEditar"><i class="fa-solid fa-pen-to-square" style="color: #57351f;"></i></button></td>
-    </tr>`;
+                        <td>${data[i]['nombreUsuario']}</td>
+                        <td>
+                            <span class="ocultar-contrasenia">${data[i]['contrasenia'].replace(/./g, '*')}</span>
+                        </td>
+                        <td>${data[i]['rol']}</td>
+                        <td>${data[i]['estatus']}</td>
+                        <td><button data-idUsuario="${data[i]['idUsuario']}" class="btnEliminar"><i class="fa-solid fa-trash" style="color: #c12525;"></i></button></td>
+                        <td><button data-idUsuario="${data[i]['idUsuario']}" id="btnEditar" class="btnEditar"><i class="fa-solid fa-pen-to-square" style="color: #57351f;"></i></button></td>
+                    </tr>`;
 
         $('#tblUsuario tbody').append(fila);
     }
 
-
-
-    $('#tblMateria').DataTable({
+    // Inicializar DataTable
+    $('#tblUsuario').DataTable({
         dom: "<'row' <'col-sm-6'l><'col-sm-5'f>>  <'row' <'col-sm-12'tr>>  <'row' <'col-4'i><'col'p>>",
         initComplete: function () {
             $('.dataTables_filter').addClass('text-end');
@@ -262,10 +300,10 @@ export function cargarTabla(data) {
             infoFiltered: "",
             infoPostFix: "",
             thousands: ",",
-            lengthMenu: "Mostrar   _MENU_  Entradas",
+            lengthMenu: "Mostrar _MENU_ Entradas",
             loadingRecords: "Cargando...",
             processing: "Procesando...",
-            search: " ",
+            search: " ",
             searchPlaceholder: "Buscar",
             zeroRecords: "Sin resultados encontrados",
             paginate: {
@@ -275,11 +313,10 @@ export function cargarTabla(data) {
                 previous: "Anterior",
             }
         },
-
-        "ordering": false,
+        ordering: false,
         retrieve: true
     });
-
+    
     var currentUserData = sessionStorage.getItem('currentUser');
     var currentUser = JSON.parse(currentUserData);    
 
@@ -290,19 +327,19 @@ export function cargarTabla(data) {
         $('.btnEliminar').hide();
         $('.btnEditar').hide();
     }
-    
-    $('#agregarMaterialPrima').on('click', 'button', function () {
-        $('#modalMaterialPrima').modal('show');
+
+    $('#agregarUsuario').on('click', 'button', function () {
+        $('#modalUsuario').modal('show');
     });
 
-
 }
-;
 
-export function deleteProducto() {
+
+export function deleteUsuario() {
+
     Swal.fire({
         title: "¿Estás seguro?",
-        text: "La materia prima se eliminará",
+        text: "El Usuario se eliminará",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
@@ -310,20 +347,22 @@ export function deleteProducto() {
         confirmButtonText: "Sí, eliminarlo"
     }).then((result) => {
         if (result.isConfirmed) {
-            const idMateria = $(this).data('idmateriaprima');
-            console.log(idMateria);
+            const idUsuario = $(this).data('idUsuario');
+            console.log("DATOS "+$(this).data('idUsuario'));
+            console.log(idUsuario);
             let datos = null;
             let params = null;
 
-            let materiaPrima = new Object();
-            materiaPrima.idUsuario = idMateria;
+            let usuario = new Object();
+            usuario.idUsuario = idUsuario;
+            usuario.logsUser = logsUsuario;
             datos = {
-                datosMateriaPrima: JSON.stringify(materiaPrima)
+                datosUsuario: JSON.stringify(usuario)
             };
 
             params = new URLSearchParams(datos);
 
-            fetch("../../api/mprima/delete",
+            fetch("../../api/log/delete",
                     {method: "POST",
                         headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
                         body: params
@@ -351,7 +390,7 @@ export function deleteProducto() {
 
             Swal.fire({
                 title: "¡Eliminado!",
-                text: "Tu materia prima ha sido eliminada.",
+                text: "El Usuario ha sido eliminado.",
                 icon: "success"
             });
             getAll();
@@ -384,19 +423,20 @@ function getAll() {
             });
 }
 
-function getProducto(idUsuario) {
+function getUsuario(idUsuario) {
     console.log(idUsuario);
-    let materiaPrima = new Object();
+    let usuario = new Object();
     let datos = null;
     let params = null;
-    materiaPrima.idUsuario = idUsuario;
+    usuario.idUsuario = idUsuario;
+    usuario.logsUser = logsUsuario;
 
     datos = {
-        datoMateriaPrima: JSON.stringify(materiaPrima)
+        datoUsuario: JSON.stringify(usuario)
     };
     console.log(datos);
     params = new URLSearchParams(datos);
-    fetch("../../api/mprima/getProducto",
+    fetch("../../api/log/getUsuario",
             {method: "POST",
                 headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
                 body: params
@@ -424,55 +464,26 @@ function getProducto(idUsuario) {
 
                 }
 
-                var fechaCompra = new Date(data['fechaCompra']);
-                var fechaCompraVencimiento = new Date(data['fechaVencimiento']);
-
-                var fechaFormateada = fechaCompra.toISOString().split('T')[0];
-                var fechaVencimientoFormateada = fechaCompraVencimiento.toISOString().split('T')[0];
-
 
                 console.log(data);
-                document.getElementById("txtNobreMaterialEditar").value = data['nombreMateria'];
-                document.getElementById("txtFechaCompraMaterialEditar").value = fechaFormateada;
-                document.getElementById("txtFechaVenciMaterialEditar").value = fechaVencimientoFormateada;
-                document.getElementById("txtCantidadMaterialEditar").value = data['cantidadExistentes'];
-                document.getElementById("txtPrecioCompraEditar").value = data['precioCompra'];
-                document.getElementById("txtPorcentajeMaterialEditar").value = data['porcentaje'];
-                document.getElementById("txtIdMateriaEditar").value = data['idUsuario'];
-
-                var medida = data['medida'];
-                var tipoMedida = medida['tipoMedida'];
-
-                var selectMedida = document.getElementById("txtMedidaMaterialEditar");
-
-                for (var i = 0; i < selectMedida.options.length; i++) {
-                    if (selectMedida.options[i].text === tipoMedida) {
-                        selectMedida.options[i].selected = true;
-                        break;
-                    }
-                }
+                document.getElementById("txtNombreEditar").value = data['nombreUsuario'];
+                document.getElementById("txtContraseñaEditar").value = data['contrasenia'];
+                document.getElementById("txtRolEditar").value = data['rol'];
+                document.getElementById("txtIdUsuarioEditar").value = data['idUsuario'];
 
             });
 }
 
 export function clean() {
 
-    document.getElementById("txtNobreMaterial").value = "";
-    document.getElementById("txtFechaCompraMaterial").value = "";
-    document.getElementById("txtFechaVenciMaterial").value = "";
-    document.getElementById("txtCantidadMaterial").value = "";
-    document.getElementById("txtPrecioCompra").value = "";
-    document.getElementById("txtPorcentajeMaterial").value = "";
-    document.getElementById("txtMedidaMaterial").value = "";
-    document.getElementById("txtIdMateria").value = "";
+    document.getElementById("txtNombre").value = "";
+    document.getElementById("txtContraseña").value = "";
+    document.getElementById("txtRol").value = "";
+    document.getElementById("txtIdUsuario").value = "";
 
-    document.getElementById("txtNobreMaterialEditar").value = "";
-    document.getElementById("txtFechaCompraMaterialEditar").value = "";
-    document.getElementById("txtFechaVenciMaterialEditar").value = "";
-    document.getElementById("txtCantidadMaterialEditar").value = "";
-    document.getElementById("txtPrecioCompraEditar").value = "";
-    document.getElementById("txtPorcentajeMaterialEditar").value = "";
-    document.getElementById("txtMedidaMaterialEditar").value = "";
-    document.getElementById("txtIdMateriaEditar").value = "";
+    document.getElementById("txtNombreEditar").value = "";
+    document.getElementById("txtContraseñaEditar").value = "";
+    document.getElementById("txtRolEditar").value = "";
+    document.getElementById("txtIdUsuarioEditar").value = "";
 
 }

@@ -21,7 +21,7 @@ public class ControllerMateriaPrima {
 
     public int insertarMateriaPrima(MateriaPrima mp) throws Exception {
         String sql = "{call insertarMateriaPrima(?, ?,"
-                + "?, ?, "
+                + "?, ?,?, "
                 + "?, ?, ?, ?)}";
 
         int idMateriaGenerado = -1;
@@ -41,9 +41,10 @@ public class ControllerMateriaPrima {
         cstmt.setDouble(5, mp.getPrecioCompra());
         cstmt.setDouble(6, mp.getPorcentaje());
         cstmt.setInt(7, mp.getMedida().getIdMedida());
-        cstmt.registerOutParameter(8, Types.INTEGER);
+        cstmt.setString(8, mp.getUser().getLogsUser());
+        cstmt.registerOutParameter(9, Types.INTEGER);
         cstmt.executeUpdate();
-        idMateriaGenerado = cstmt.getInt(8);
+        idMateriaGenerado = cstmt.getInt(9);
         mp.setIdMateriaPrima(idMateriaGenerado);
         
         m.setMateriaPrima(mp);
@@ -55,31 +56,45 @@ public class ControllerMateriaPrima {
         return idMateriaGenerado;
     }
     
-    public void eliminarMateriaPrima(int idMateriaPrima) throws Exception {
+    public void eliminarMateriaPrima(int idMateriaPrima,String logs) throws Exception {
         String query = "DELETE FROM movimiento WHERE idMateriaPrima = ?";
         String sql = "DELETE FROM materia_prima WHERE idMateriaPrima = ?;";
+        String sql2 = "INSERT INTO logsUser (usuario, procedimiento) VALUES (?, ?)";
     
         ConexionMySQL connMySQL = new ConexionMySQL();
 
         Connection conn = connMySQL.open();
+        
+        //Movimiento
         CallableStatement cstmt1 = conn.prepareCall(query);
         
         cstmt1.setInt(1, idMateriaPrima);
         cstmt1.executeUpdate();
         
+        //Materia Prima
+        
         CallableStatement cstmt = conn.prepareCall(sql);
  
         cstmt.setInt(1, idMateriaPrima);
         cstmt.executeUpdate();
+        
+        //Logs
+        
+        CallableStatement cstmt2 = conn.prepareCall(sql2);
+        String procedimiento = "Se Modifico Materia Prima con ID: " + idMateriaPrima;
+        cstmt.setString(1, logs);
+        cstmt.setString(1, procedimiento);
+        cstmt.executeUpdate();
 
         cstmt1.close();
+        cstmt2.close();
         cstmt.close();
         connMySQL.close();
     }
 
     public void actualizarMateriaPrima(MateriaPrima mp) throws Exception {
         String sql = "{call actualizarMateriaPrima(?, ?,"
-                + "?, ?, "
+                + "?, ?, ? , "
                 + "?, ?, ?, ?)}";
 
         Movimiento m = new Movimiento();
@@ -96,7 +111,8 @@ public class ControllerMateriaPrima {
         cstmt.setDouble(5, mp.getCantidadExistentes());
         cstmt.setDouble(6, mp.getPrecioCompra());
         cstmt.setDouble(7, mp.getPorcentaje());
-        cstmt.setInt(8, mp.getMedida().getIdMedida());
+        cstmt.setString(8, mp.getUser().getLogsUser());
+        cstmt.setInt(9, mp.getMedida().getIdMedida());
 
         cstmt.executeUpdate();
         

@@ -302,6 +302,12 @@ input[type="file"] {
     margin-left: 10px !important;
 }
 
+#txtCorreoEditar, #txtContraseñaEditar, #txtRolEditar{
+    width: 200px !important;
+    height: 35px !important;
+    margin-left: 10px !important;
+}
+
 #registroUser {
     margin-bottom: 10% !important;
     margin-left: 10% !important;
@@ -352,3 +358,9 @@ input[type="number"].input-medida {
   font-weight: bold;
 }
 
+#condiciones {
+        text-align: center;
+        font-size: smaller;
+        color: green;
+        margin-top: 5px;
+    }

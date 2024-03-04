@@ -11,13 +11,15 @@ public class Usuario {
     private String contrasenia;
     private String rol;
     private int estatus;
+    private String logsUser;
 
-    public Usuario(int idUsuario, String nombreUsuario, String contrasenia, String rol, int estatus) {
+    public Usuario(int idUsuario, String nombreUsuario, String contrasenia, String rol, int estatus, String logsUser) {
         this.idUsuario = idUsuario;
         this.nombreUsuario = nombreUsuario;
         this.contrasenia = contrasenia;
         this.rol = rol;
         this.estatus = estatus;
+        this.logsUser = logsUser;
     }
 
     public Usuario() {
@@ -63,10 +65,17 @@ public class Usuario {
         this.estatus = estatus;
     }
 
-    @Override
-    public String toString() {
-        return "Usuario{" + "idUsuario=" + idUsuario + ", nombreUsuario=" + nombreUsuario + ", contrasenia=" + contrasenia + ", rol=" + rol + ", estatus=" + estatus + '}';
+    public String getLogsUser() {
+        return logsUser;
     }
 
-    
+    public void setLogsUser(String logsUser) {
+        this.logsUser = logsUser;
+    }
+
+    @Override
+    public String toString() {
+        return "Usuario{" + "idUsuario=" + idUsuario + ", nombreUsuario=" + nombreUsuario + ", contrasenia=" + contrasenia + ", rol=" + rol + ", estatus=" + estatus + ", logsUser=" + logsUser + '}';
+    }
+
 }

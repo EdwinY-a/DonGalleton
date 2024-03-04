@@ -15,8 +15,12 @@ public class MateriaPrima {
     private float precioCompra;
     private int porcentaje;
     private Medida medida;
+    private Usuario user;
 
-    public MateriaPrima(int idMateriaPrima, String nombreMateria, String fechaCompra, String fechaVencimiento, int estatus, float cantidadExistentes, float precioCompra, int porcentaje, Medida medida) {
+    public MateriaPrima() {
+    }
+
+    public MateriaPrima(int idMateriaPrima, String nombreMateria, String fechaCompra, String fechaVencimiento, int estatus, float cantidadExistentes, float precioCompra, int porcentaje, Medida medida, Usuario user) {
         this.idMateriaPrima = idMateriaPrima;
         this.nombreMateria = nombreMateria;
         this.fechaCompra = fechaCompra;
@@ -26,9 +30,7 @@ public class MateriaPrima {
         this.precioCompra = precioCompra;
         this.porcentaje = porcentaje;
         this.medida = medida;
-    }
-
-    public MateriaPrima() {
+        this.user = user;
     }
 
     public int getIdMateriaPrima() {
@@ -103,9 +105,18 @@ public class MateriaPrima {
         this.medida = medida;
     }
 
+    public Usuario getUser() {
+        return user;
+    }
+
+    public void setUser(Usuario user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
-        return "MateriaPrima{" + "idMateriaPrima=" + idMateriaPrima + ", nombreMateria=" + nombreMateria + ", fechaCompra=" + fechaCompra + ", fechaVencimiento=" + fechaVencimiento + ", estatus=" + estatus + ", cantidadExistentes=" + cantidadExistentes + ", precioCompra=" + precioCompra + ", porcentaje=" + porcentaje + ", medida=" + medida + '}';
+        return "MateriaPrima{" + "idMateriaPrima=" + idMateriaPrima + ", nombreMateria=" + nombreMateria + ", fechaCompra=" + fechaCompra + ", fechaVencimiento=" + fechaVencimiento + ", estatus=" + estatus + ", cantidadExistentes=" + cantidadExistentes + ", precioCompra=" + precioCompra + ", porcentaje=" + porcentaje + ", medida=" + medida + ", user=" + user + '}';
     }
+
     
 }

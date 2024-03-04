@@ -12,9 +12,11 @@ USE don_galleto;
 
 CALL insertarUsuario("Alda", MD5("Alda1234"), @out1);
 CALL insertarUsuario("Jorge", MD5("Jorge1234"), @out1);
-CALL insertarUsuario("Edwin", MD5("Edwin1234"), @out1);
+CALL insertarUsuario("EdwinRive", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4","Administrador","EdwinRive","jaja");
 CALL insertarUsuario("Diego", MD5("Diego1234"), @out1);
 CALL insertarUsuario("dongalleto", MD5("dongalleto"), @out1);
+
+SELECT * FROM v_usuario;
 
 SELECT * FROM usuario;
 

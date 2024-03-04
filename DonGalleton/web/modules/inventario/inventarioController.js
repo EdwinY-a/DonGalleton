@@ -1,3 +1,6 @@
+let currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+let logsUsuario = currentUser.nombreUsuario;
+
 export function inicializar() {
     getAll();
 }
@@ -7,8 +10,10 @@ export function guardarMateriaPrima() {
     let datos = null;
     let params = null;
 
-    let materiaPrima = new Object();
-    materiaPrima.medida = {};
+    let materiaPrima = {
+        medida: {},
+        user: {logsUser: logsUsuario} // Asignar logsUsuario a la propiedad user
+    };
 
     let idMateria = parseInt(document.getElementById("txtIdMateria").value.trim().length);
     let idMateriaEditar = parseInt(document.getElementById("txtIdMateriaEditar").value.trim().length);
@@ -70,7 +75,7 @@ export function guardarMateriaPrima() {
     } else {
         let idMaterial = parseInt(document.getElementById("txtIdMateriaEditar").value);
         materiaPrima.idMateriaPrima = idMaterial;
-
+        materiaPrima.user.logsUser = logsUsuario;
         materiaPrima.nombreMateria = document.getElementById("txtNobreMaterialEditar").value;
         materiaPrima.fechaCompra = cambiarFormatoFecha(document.getElementById("txtFechaCompraMaterialEditar").value);
         materiaPrima.fechaVencimiento = cambiarFormatoFecha(document.getElementById("txtFechaVenciMaterialEditar").value);
@@ -176,7 +181,7 @@ export function cargarTabla(data) {
         // Llamar a la función editarProducto con los datos del producto seleccionado
         editarProducto(materia);
     });
-    
+
 //    $(document).ready(function() {
 //    // Initialize DataTable
 //    $('#tblMateria').DataTable();
@@ -188,7 +193,7 @@ export function cargarTabla(data) {
 //        $('#tblMateria tbody').empty();
 //    }
 //});
-    
+
     // Destruye la tabla
     if ($.fn.DataTable.isDataTable('#tblMateria')) {
         $('#tblMateria').DataTable().destroy();
@@ -252,6 +257,16 @@ export function cargarTabla(data) {
         "ordering": false,
         retrieve: true
     });
+    var currentUserData = sessionStorage.getItem('currentUser');
+    var currentUser = JSON.parse(currentUserData);
+
+    if (currentUser['rol'] === 'administrador') {
+        $('.btnEliminar').show();
+        $('.btnEditar').show();
+    } else {
+        $('.btnEliminar').hide();
+        $('.btnEditar').hide();
+    }
 
 
     $('#agregarMaterialPrima').on('click', 'button', function () {
@@ -280,6 +295,7 @@ export function deleteProducto() {
 
             let materiaPrima = new Object();
             materiaPrima.idMateriaPrima = idMateria;
+            materiaPrima.user.logsUser = logsUsuario;
             datos = {
                 datosMateriaPrima: JSON.stringify(materiaPrima)
             };

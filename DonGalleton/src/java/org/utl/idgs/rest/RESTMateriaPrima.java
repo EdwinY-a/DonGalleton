@@ -129,7 +129,7 @@ public class RESTMateriaPrima {
         try 
         {
             mp = gson.fromJson(datosMateriaPrima, MateriaPrima.class);
-            cmp.eliminarMateriaPrima(mp.getIdMateriaPrima());
+            cmp.eliminarMateriaPrima(mp.getIdMateriaPrima(),mp.getUser().getLogsUser());
             out = gson.toJson(mp);
         }
         catch (JsonParseException jpe)

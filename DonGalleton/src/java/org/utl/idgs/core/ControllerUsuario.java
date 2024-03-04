@@ -11,11 +11,10 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import org.utl.idgs.model.Movimiento;
 
 /**
  *
- * @author Jorge
+ * @author Alda
  */
 public class ControllerUsuario {
     public Usuario login(String usuario, String contrasenia) throws SQLException{
@@ -45,9 +44,9 @@ public class ControllerUsuario {
         return u;
     }
     
-    public int registrarUsuario(Usuario usuario) throws Exception {
+    public int insertarUsuario(Usuario usuario) throws Exception {
 
-        String sql = "{call insertarUsuario(?, ?, ?)}";
+        String sql = "{call insertarUsuario(?, ?, ?,? ,?)}";
 
         int idUsuarioGenerado = -1;
         ConexionMySQL connMySQL = new ConexionMySQL();
@@ -59,10 +58,12 @@ public class ControllerUsuario {
         cstmt.setString(1, usuario.getNombreUsuario());
         cstmt.setString(2, usuario.getContrasenia());
         cstmt.setString(3, usuario.getRol());
+        cstmt.setString(4, usuario.getLogsUser());
+        System.out.println("LOGS " +usuario.getLogsUser());
 
-        cstmt.registerOutParameter(4, Types.INTEGER);
+        cstmt.registerOutParameter(5, Types.INTEGER);
         cstmt.executeUpdate();
-        idUsuarioGenerado = cstmt.getInt(4);
+        idUsuarioGenerado = cstmt.getInt(5);
         usuario.setIdUsuario(idUsuarioGenerado);
         
 
@@ -71,6 +72,49 @@ public class ControllerUsuario {
 
         return idUsuarioGenerado;
     }
+    
+    public void desactivarUsuario(int idUsuario, String logs) throws Exception {
+        String sql = "{CALL desActivarUsuario(?,?)};";
+    
+        ConexionMySQL connMySQL = new ConexionMySQL();
+
+        Connection conn = connMySQL.open();
+        
+        
+        CallableStatement cstmt = conn.prepareCall(sql);
+ 
+        cstmt.setInt(1, idUsuario);
+        cstmt.setString(2, logs);
+        
+        cstmt.executeUpdate();
+
+        cstmt.close();
+        connMySQL.close();
+    }
+    
+    public void actualizarUsuario(Usuario usuario) throws Exception {
+
+        String sql = "{call actualizarUsuario(?, ?, ?,?,?)}";
+
+        ConexionMySQL connMySQL = new ConexionMySQL();
+        Connection conn = connMySQL.open();
+
+        CallableStatement cstmt = conn.prepareCall(sql); 
+        
+        cstmt.setInt(1, usuario.getIdUsuario());
+        cstmt.setString(2, usuario.getNombreUsuario());
+        cstmt.setString(3, usuario.getContrasenia());
+        cstmt.setString(4, usuario.getRol());
+        cstmt.setString(5, usuario.getLogsUser());
+        
+
+        cstmt.executeUpdate();
+
+        cstmt.close();
+        connMySQL.close();
+    }
+    
+    
     public List<Usuario> getAll(String filtro) throws Exception {
           String sql = "SELECT * FROM v_usuario";
 
@@ -93,9 +137,8 @@ public class ControllerUsuario {
 
         return usuario;
     }
-    
     public Usuario getUsuario(int filtro) throws Exception {
-        String sql = "SELECT * FROM v_usuario WHERE idUsuario ="+filtro+";" ;
+        String sql = "SELECT * FROM usuario WHERE idUsuario ="+filtro+";" ;
 
         ConexionMySQL connMySQL = new ConexionMySQL(); 
 
@@ -104,15 +147,17 @@ public class ControllerUsuario {
         PreparedStatement pstmt = conn.prepareStatement(sql);
 
         ResultSet rs = pstmt.executeQuery();
-        Usuario usuarios = new Usuario();
+        Usuario user = new Usuario();
 
         while (rs.next()) {
-            usuarios = fill(rs);
+            user = fill(rs);
         }
+
         rs.close();
         pstmt.close();
         connMySQL.close();
-        return usuarios;
+
+        return user;
     }
 
     

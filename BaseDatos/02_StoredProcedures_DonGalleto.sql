@@ -8,6 +8,12 @@
 
 USE don_galleto;
 
+-- INICIO TRIGGER LOGS --
+
+
+
+-- FIN TRIGGER LOGS -- 
+
 -- INICIO PROCEDURES USUARIO: INSERTAR, ACTUALIZAR, ACTIVAR, DESACTIVAR --
 
 DROP PROCEDURE IF EXISTS insertarUsuario;
@@ -16,16 +22,26 @@ CREATE PROCEDURE insertarUsuario(
 								IN	var_nombreUsuario		VARCHAR(45),		-- 1
 								IN	var_contrasenia			VARCHAR(80),		-- 2
                                 IN 	var_rol					VARCHAR(30),		-- 3
+                                IN  var_logs				VARCHAR(50),
     
 								OUT	var_idUsuario			INT					-- 4
 )
 BEGIN
+	declare prodecimiento VARCHAR(50);
 	INSERT INTO usuario(nombreUsuario, contrasenia, rol)
 				 VALUES(var_nombreUsuario, var_contrasenia, var_rol);
 
 	SET var_idUsuario = LAST_INSERT_ID();
+    SET prodecimiento = CONCAT('Se inserto usuario con ID: ', var_idUsuario);
+    
+    INSERT INTO logsUser (usuario, procedimiento)
+				VALUES (var_logs, prodecimiento);
 END $$
 DELIMITER ;
+
+CALL insertarUsuario('EdwinRive', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'admin', 'EdwinRive', @idUsuarioCreado);
+
+SELECT @idUsuarioCreado AS idUsuarioCreado;
 
 DROP PROCEDURE IF EXISTS actualizarUsuario;
 DELIMITER $$
@@ -33,12 +49,19 @@ CREATE PROCEDURE actualizarUsuario(
 									IN	var_idUsuario			INT,				-- 1
 									IN	var_nombreUsuario		VARCHAR(45),		-- 2
 									IN	var_contrasenia			VARCHAR(45),		-- 3
-                                    IN 	var_rol					VARCHAR(30)			-- 4
+                                    IN 	var_rol					VARCHAR(30),			-- 4
+                                    IN 	var_logs				VARCHAR(30)
 )
 BEGIN
+declare prodecimiento VARCHAR(50);
 	UPDATE	usuario
     SET		nombreUsuario = var_nombreUsuario, contrasenia = var_contrasenia, rol = var_rol
     WHERE	idUsuario = var_idUsuario;
+    
+    SET prodecimiento = CONCAT('Se actualizo usuario con ID: ', var_idUsuario);
+    
+    INSERT INTO logsUser (usuario, procedimiento)
+				VALUES (var_logs, prodecimiento);
 END $$
 DELIMITER ;
 
@@ -57,12 +80,19 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS desActivarUsuario;
 DELIMITER $$
 CREATE PROCEDURE desActivarUsuario(
-									IN	var_idUsuario		INT		-- 1
+									IN	var_idUsuario		INT,		-- 1
+                                    IN 	var_logs			VARCHAR(30)
 )
 BEGIN
+declare prodecimiento VARCHAR(50);
 	UPDATE	usuario
     SET		estatus = 0
     WHERE	idUsuario = var_idUsuario;
+    
+    SET prodecimiento = CONCAT('Se desactivo usuario con ID: ', var_idUsuario);
+    
+    INSERT INTO logsUser (usuario, procedimiento)
+				VALUES (var_logs, prodecimiento);
 END $$
 DELIMITER ;
 
@@ -112,10 +142,12 @@ CREATE PROCEDURE insertarMateriaPrima(
 										IN	var_precioCompra			DOUBLE,				-- 5
 										IN	var_porcentaje				INT,				-- 6
 										IN	var_idMedida				INT,				-- 7
+                                        IN  var_logs					VARCHAR(30),
 
 										OUT	var_idMateriaPrima			INT					-- 8
 )
 BEGIN
+declare prodecimiento VARCHAR(50);
 	INSERT INTO materia_prima(nombreMateria, fechaCompra,
 															fechaVencimiento, cantidadExistentes, precioCompra,
 																												porcentaje, idMedida)
@@ -124,6 +156,10 @@ BEGIN
 																										var_porcentaje, var_idMedida);
 
 	SET	var_idMateriaPrima = LAST_INSERT_ID();
+    SET prodecimiento = CONCAT('Se Registro Materia Prima con ID: ', var_idMateriaPrima);
+    
+    INSERT INTO logsUser (usuario, procedimiento)
+				VALUES (var_logs, prodecimiento);
 END $$
 DELIMITER ;
 
@@ -137,9 +173,12 @@ CREATE PROCEDURE actualizarMateriaPrima(
 										IN	var_cantidadExistentes		DOUBLE,				-- 5
 										IN	var_precioCompra			DOUBLE,				-- 6
 										IN	var_porcentaje				INT,				-- 7
+                                        IN  var_logs					VARCHAR(30),
 										IN	var_idMedida				INT					-- 8
 )
 BEGIN
+
+declare prodecimiento VARCHAR(50);
 	IF var_porcentaje > 0 THEN
 		UPDATE	materia_prima
         SET		estatus = 1
@@ -155,6 +194,11 @@ BEGIN
 			fechaVencimiento = STR_TO_DATE(var_fechaVencimiento, '%d/%m/%Y'), cantidadExistentes = var_cantidadExistentes,
             precioCompra = var_precioCompra, porcentaje = var_porcentaje, idMedida = var_idMedida
 	WHERE	idMateriaPrima = var_idMateriaPrima;
+    
+    SET prodecimiento = CONCAT('Se Modifico Materia Prima con ID: ', var_idMateriaPrima);
+    
+    INSERT INTO logsUser (usuario, procedimiento)
+				VALUES (var_logs, prodecimiento);
 END $$
 DELIMITER ;
 
@@ -174,7 +218,8 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS desActivarMateriaPrima;
 DELIMITER $$
 CREATE PROCEDURE desActivarMateriaPrima(
-										IN	var_idMateriaPrima		INT		-- 1
+										IN	var_idMateriaPrima		INT,		-- 1
+                                        IN	var_logs				VARCHAR(30)
 )
 BEGIN
 	UPDATE	materia_prima
@@ -189,9 +234,13 @@ CREATE PROCEDURE desActivarMateriaPrimaPorFechaVencimiento(
 															IN	var_fechaActual		VARCHAR(45)		-- 1
 )
 BEGIN
+
+
 	UPDATE	materia_prima
     SET		estatus = 0
     WHERE	fechaVencimiento < STR_TO_DATE(var_fechaActual, '%d/%m/%Y');
+    
+   
 END $$
 DELIMITER ;
 
