@@ -1,0 +1,60 @@
+
+/* 
+    Created on : 18 nov. 2023, 19:50:11
+    Author     : alda
+*/
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url("../../resources/fondoGalletas.png");
+}
+
+.login{
+    width: 400px;
+    height: min-content;
+    padding: 20px;
+    border-radius: 12px;
+    background: #90848C;
+
+    backdrop-filter: blur(15px) !important;
+    background: rgba;
+    background-color: rgba(223, 171, 149, 0.4);
+    border-radius: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.center-image{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    height: 100px;
+}
+
+.login h1{
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.login form{
+    font-size: 20px;
+}
+
+.login form .form-group{
+    margin-bottom: 12px;
+}
+
+label{
+    color: white;
+}
+

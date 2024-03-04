@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Don Galleto</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Alda">
+        <meta name="date" content="18/11/2023">
+        <link rel="stylesheet" type="text/css" href="styles/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="styles/js/gft/gft.css">
+        <link rel="stylesheet" type="text/css" href="styles/css/login.css"/>
+        <link rel="stylesheet" href="styles/datatables/datatables.min.css"/>
+        <link rel="icon" type="image/x-icon" href="resources/icono.png"/>
+        <script src="styles/js/icons.js"></script>
+        <script src="styles/js/md5.min.js"></script>
+    </head>
+    <body>
+        <div class="login">
+            <img src="resources/icono.png" alt="Logo" class="center-image"/>
+            <h1 class="text-center">
+                Iniciar Sesi&oacute;n
+            </h1>
+            <hr>
+            <form>
+                <div class="form-group" id="divUsuario">
+                    <label class="form-label" for="idUsuario">
+                        Usuario
+                    </label>
+                    <input class="form-control" type="text" id="idUsuario" required/>
+                    <div class="invalid-feedback d-none" id="divMensajeUsuario">
+                        Ingrese su nombre de usuario.
+                    </div>
+                </div>
+                <div class="form-group" id="divContrasenia">
+                    <label class="form-label" for="idPassword">
+                        Contrase&ntilde;a
+                    </label>
+                    <input class="form-control" type="password" id="idPassword" required/>
+                    <div class="invalid-feedback d-none" id="divMensajeContrasenia">
+                        Ingresa tu contrase&ntilde;a.
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success w-100" id="btnLogin">
+                    Iniciar Sesi&oacute;n
+                </button>
+                <!-- INICIO DIV QUE CONTIENE EL "CARGANDO" -->
+                <div class="d-flex justify-content-center spinner-container d-none mt-3">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">
+                            Loading...
+                        </span>
+                    </div>
+                </div>
+                <!-- FIN DEL DIV QUE CONTIENE EL "CARGANDO" -->
+            </form>
+        </div>
+        <script src="styles/js/bootstrap.bundle.js"></script>
+        <script src="js/jquery.js"></script>
+        <script src="js/loginController.js"></script>
+        <script src="styles/sweetalert2/sweetalert2.all.min.js"></script>
+        <script src="styles/datatables/datatables.min.js"></script>
+    </body>
+</html>

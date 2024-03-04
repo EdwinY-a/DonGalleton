@@ -1,0 +1,95 @@
+<!-- Vista parcial de estado de cuenta -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 d-flex justify-content-center align-items-center mb-3">
+                <div class="col-lg-2 col-md-2 col-sm-2 d-flex justify-content-center align-items-center">
+                    <label for="txtDesde" class="form-label">
+                        Buscar desde:
+                    </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 d-flex justify-content-center align-items-center">
+                    <input class="form-control" type="date" id="txtDesde"/>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 d-flex justify-content-center align-items-center">
+                    <label for="txtHasta" class="form-label">
+                        Hasta:
+                    </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 d-flex justify-content-center align-items-center">
+                    <input class="form-control" type="date" id="txtHasta"/>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 d-grid justify-content-center align-items-center">
+                    <button class="btn btn-primary" id="btnBuscarMovimiento" type="button" onclick="moduloEstadoDeCuenta.traerDatos();">
+                        BUSCAR
+                    </button>
+                </div>
+            </div>
+            <hr/>
+            <div class="col-lg-12 col-md-12 col-sm-12 d-flex justify-content-center align-items-center mb-3">
+                <div class="col-lg-3 col-md-3 col-sm-3 d-flex justify-content-center align-items-center">
+                    <label for="txtCompra" class="form-label">
+                        Materia prima mas comprado:
+                    </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 d-flex justify-content-center align-items-center">
+                    <input class="form-control" type="text" id="txtCompra" disabled readonly/>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 d-flex justify-content-center align-items-center">
+                    <label for="txtVenta" class="form-label">
+                        Producto mas vendido:
+                    </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 d-flex justify-content-center align-items-center">
+                    <input class="form-control" type="text" id="txtVenta" disabled readonly/>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 d-flex justify-content-center align-items-center mb-3">
+                <div class="col-lg-4 col-md-4 col-sm-4 d-flex justify-content-center align-items-center">
+                    <label for="cmbFiltroIngEg" class="form-label">
+                        Filtrar por:
+                    </label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 d-flex justify-content-center align-items-center">
+                    <select class="form-select" id="cmbFiltroIngEg" disabled onchange="moduloEstadoDeCuenta.filtrar();">
+                        <option value="1" selected>
+                            Todos
+                        </option>
+                        <option value="2">
+                            Ingresos
+                        </option>
+                        <option value="3">
+                            Egresos
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <table id="tblMovimientos" class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th id="tblCabecera">
+                            Fecha movimiento
+                        </th>
+                        <th id="tblCabecera">
+                            Movimiento
+                        </th>
+                        <th id="tblCabecera">
+                            Monto
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-center spinner-container d-none mt-3">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">
+                    Loading...
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
