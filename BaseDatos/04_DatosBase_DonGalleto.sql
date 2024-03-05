@@ -13,7 +13,10 @@ USE don_galleto;
 CALL insertarUsuario("Alda", MD5("Alda1234"), @out1);
 CALL insertarUsuario("Jorge", MD5("Jorge1234"), @out1);
 CALL insertarUsuario("EdwinRive", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4","Administrador","EdwinRive","jaja");
-CALL insertarUsuario("Diego", MD5("Diego1234"), @out1);
+CALL insertarUsuario("Diego", MD5("325671d543527363b94c9d537d06385c3611735c042a41d256d32d78f6559ff6"), @out1);
+CALL insertarUsuario('EdwinRive', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'admin', 'EdwinRive', @idUsuarioCreado);
+CALL insertarUsuario('Diego', '325671d543527363b94c9d537d06385c3611735c042a41d256d32d78f6559ff6', 'admin', 'EdwinRive', @idUsuarioCreado);
+
 CALL insertarUsuario("dongalleto", MD5("dongalleto"), @out1);
 
 SELECT * FROM v_usuario;
@@ -41,7 +44,9 @@ CALL insertarMedida("G", @out1);
 CALL insertarMedida("KG", @out1);
 CALL insertarMedida("LB", @out1);
 CALL insertarMedida("OZ", @out1);
+
 CALL insertarMedida("ML", @out1);
+
 CALL insertarMedida("L", @out1);
 CALL insertarMedida("GAL", @out1);
 CALL insertarMedida("CU", @out1);

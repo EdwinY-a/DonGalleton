@@ -23,65 +23,94 @@ import java.util.Set;
 
 @Path("log")
 public class RESTUsuario {
-
     @Path("in")
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response login(@FormParam("datos") @DefaultValue("") String datos) throws Exception {
+    public Response login(@Context HttpServletRequest request, @FormParam("datos") String datos) throws Exception {
         String out = null;
         Gson gson = new Gson();
         Usuario u = new Usuario();
         ControllerUsuario cu = new ControllerUsuario();
-
+        
         try {
             u = gson.fromJson(datos, Usuario.class);
 
             if (u == null) {
-                out = """
-                      {"error": "Debe ingresar usuario y contraseña para continuar."}
-                      """;
+                out = "{\"error\": \"Debe ingresar usuario y contraseña para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
-            if (u.getNombreUsuario() == null || u.getNombreUsuario() == "") {
-                out = """
-                      {"error": "Ingrese su nombre de usuario para continuar."}
-                      """;
+            if (u.getNombreUsuario() == null || u.getNombreUsuario().isEmpty()) {
+                out = "{\"error\": \"Ingrese su nombre de usuario para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
-            if (u.getContrasenia() == null || u.getContrasenia() == "") {
-                out = """
-                      {"error": "Ingrese su contraseña para continuar."}
-                      """;
+            if (u.getContrasenia() == null || u.getContrasenia().isEmpty()) {
+                out = "{\"error\": \"Ingrese su contraseña para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
 
             u = cu.login(u.getNombreUsuario(), u.getContrasenia());
 
             if (u == null) {
-                out = """
-                      {"error": "Usuario no encontrado, revise su usuario y contraseña."}
-                      """;
+                out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
             } else {
                 if (u.getEstatus() == 1) {
+                        //Al objeto emp se ejecuta el metodo settoken donde crea el token
+                u.setLastToken();
+                System.out.println("Token "+u.getLastToken());
+                //Usamos el metodo generar token del controller para asignarle el token al usuario en la base de datos
+                cu.generarToken(u.getIdUsuario(), u.getLastToken());
+                
                     out = gson.toJson(u);
                 } else {
-                    out = """
-                        {"error": "El usuario esta inactivo."}
-                    """;
+                    out = "{\"error\": \"El usuario está inactivo.\"}";
                 }
             }
-
         } catch (Exception ex) {
             ex.printStackTrace();
-            out = """
-                  {"exception": "%s"}
-                  """;
-            out = String.format(out, ex.getMessage());
+            out = "{\"exception\": \"" + ex.getMessage() + "\"}";
         }
+        
+//        // Verificar la dirección IP
+//        String clientIP = request.getRemoteAddr();
+//        System.out.println("Dirección IP del cliente: " + clientIP);
+//
+//        if (!ALLOWED_IPS.contains(clientIP)) {
+//        return Response.status(Response.Status.FORBIDDEN).entity("{\"error\": \"Acceso no autorizado desde esta dirección IP.\"}").build();
+//}
 
-        return Response.status(Response.Status.OK).entity(out).build();
-
+        return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
     }
+    
+
+  
+// Función logOut en tu servicio REST
+@POST
+@Produces(MediaType.APPLICATION_JSON)
+@Path("out")
+public Response logOut(@FormParam("usuario") @DefaultValue("") String u) throws Exception {
+    String out = null;
+    Usuario usu = null;
+    ControllerUsuario cu = new ControllerUsuario();
+    Gson gson = new Gson();
+    usu = gson.fromJson(u, Usuario.class);
+
+    try {
+        cu = new ControllerUsuario();
+        
+        if (cu.eliminarToken(usu)) {
+            out = "{\"ok\":\"Eliminación de Token Correcta\"}";
+        } else {
+            out = "{\"error\":\"Eliminación de token no realizada\"}";
+        }
+        
+    } catch (JsonParseException jpe) {
+        out = "{\"error\":\"Eliminación no concedida\"}";
+        jpe.printStackTrace();
+    }
+    
+    return Response.status(Response.Status.OK).entity(out).build();
+}
+
     @Path("save")
     @POST
     @Produces(MediaType.APPLICATION_JSON)

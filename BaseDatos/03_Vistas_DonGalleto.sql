@@ -16,9 +16,11 @@ CREATE VIEW v_usuario AS
 			,u.nombreUsuario	-- 2
             ,u.contrasenia		-- 3
             ,u.rol				-- 4
-            ,u.estatus			-- 5
+            ,u.estatus,			-- 5
+            u.lastToken,
+            DATE_FORMAT(u.dateLastToken, '%d/%m/%Y %H:%i:%S') AS dateLastToken
     FROM	usuario u;
-
+select * from v_usuario;
 -- FIN VISTA USUARIOS --
 
 -- INICIO VISTA MEDIDAS --

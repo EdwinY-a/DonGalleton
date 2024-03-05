@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,8 +169,94 @@ public class ControllerUsuario {
         u.setNombreUsuario(rs.getString("nombreUsuario"));
         u.setContrasenia(rs.getString("contrasenia"));
         u.setRol(rs.getString("rol"));
+        u.setLastToken(rs.getString("lastToken"));
+        u.setDateLastToken(rs.getString("dateLastToken"));
         u.setEstatus(rs.getInt("estatus"));
         
         return u;
     }
+    
+    public void generarToken(int idUsuario, String token) throws SQLException{
+        //Preparamos el procedure
+        String sql="call generarToken(?, ?);";
+        
+        //Llamamos el objeto con el que vamos a conectar a base de datos
+        ConexionMySQL connMySQL=new ConexionMySQL();
+        
+        //Abrimos conexion a base de datos
+        Connection conn=connMySQL.open();
+        
+        //Llamamos al procedure que escribimos en la variable sql
+        CallableStatement callsmnt=conn.prepareCall(sql);
+        
+        //En el primer ? del procedure le asignamos el id del usuario
+        callsmnt.setInt(1, idUsuario);
+        //En el segundo? del procedure le asignamos el token que se genero en el metodo de la clase del modelo
+        callsmnt.setString(2, token);
+        //Ejecutamos el procedure
+        callsmnt.executeUpdate();
+        
+        //Cerramos el call
+        callsmnt.close();
+        //Cerramos conexion
+        connMySQL.close();
+    }
+    
+    /*
+        Metodo para consultar si existe el token y es igual al que esta manipulando la app
+    */
+    public boolean validarToken(String t) throws Exception{
+        //Declaramos una variable que nos regresa un falso
+        boolean r=false;
+        //Preparamos la consulta y la t es donde ira el parametro que recibe el metodo para asi quede completa la consulta
+        String sql="SELECT * FROM v_usuario WHERE lastToken='"+t+"';";
+        
+        //Traemos el objeto con el que vamos a conectar a la base de datos
+        ConexionMySQL conexionMySQL=new ConexionMySQL();
+        
+        //Abrimos conexion a la base de datos
+        Connection connection=conexionMySQL.open();
+        
+        //Creamos el objeto que modela la sentencia
+        Statement stmnt=connection.createStatement();
+        //Preparamos la variable que va a recibir el reultado de la consulta y ejecutamos la consulta
+        ResultSet rs=stmnt.executeQuery(sql);
+        //Si hay resultados la variable nos la pone en verdadero
+        if(rs.next())
+            r=true;
+        
+        //Cerramos el statment
+        stmnt.close();
+        //Cerramos la conexion
+        connection.close();
+        //Cerramos el objeto
+        conexionMySQL.close();
+        
+        //Nos regresa verdad si llego hasta aqui
+        return r;
+    }
+    
+    /*
+        Metodo que elimina el token de la base de datos cada que se cierra la sesion
+    */
+   public boolean eliminarToken(Usuario u) throws Exception {
+        boolean r = false;
+        String query = "UPDATE usuario SET lastToken = '' WHERE idUsuario = ?";
+        ConexionMySQL connMySQL = new ConexionMySQL();
+
+        //Abrimos la conexión con la Base de Datos:
+        Connection connection = connMySQL.open();
+
+        //CallableStatement cstmt = (CallableStatement) connection.prepareCall(query);
+        PreparedStatement preparedStetement = connection.prepareCall(query);
+        preparedStetement.setInt(1, u.getIdUsuario());
+        preparedStetement.execute();
+        r = true;
+        preparedStetement.close();
+        connection.close();
+        connMySQL.close();
+        return r;
+    }
+   
+
 }

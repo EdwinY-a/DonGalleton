@@ -27,6 +27,13 @@ export function guardarMateriaPrima() {
         materiaPrima.precioCompra = document.getElementById("txtPrecioCompra").value;
         materiaPrima.porcentaje = document.getElementById("txtPorcentajeMaterial").value;
         materiaPrima.medida.idMedida = document.getElementById("txtMedidaMaterial").value;
+        
+         
+        let usu = currentUser;
+        if (usu == null) {
+            Swal.fire('', 'No tiene permiso para realizar esta operación. Inicie sesión primero.', 'warning');
+            return;
+  }
 
         datos = {
             datosMateriaPrima: JSON.stringify(materiaPrima)
@@ -83,6 +90,13 @@ export function guardarMateriaPrima() {
         materiaPrima.precioCompra = document.getElementById("txtPrecioCompraEditar").value;
         materiaPrima.porcentaje = document.getElementById("txtPorcentajeMaterialEditar").value;
         materiaPrima.medida.idMedida = document.getElementById("txtMedidaMaterialEditar").value;
+        
+         
+        let usu = currentUser;
+        if (usu == null) {
+            Swal.fire('', 'No tiene permiso para realizar esta operación. Inicie sesión primero.', 'warning');
+            return;
+  }
 
         datos = {
             datosMateriaPrima: JSON.stringify(materiaPrima)
@@ -339,6 +353,14 @@ export function deleteProducto() {
 }
 
 function getAll() {
+     
+        
+     let currentUser = sessionStorage.getItem('currentUser');
+    let usu = JSON.parse(currentUser);
+    if (usu == null) {
+        Swal.fire('', 'No tiene permiso para ver la tabla de materia prima. Inicie sesión primero.', 'warning');
+        return;
+    }
     let url = "../../api/mprima/getAll";
     fetch(url)
             .then(response => {

@@ -1,6 +1,9 @@
 
 package org.utl.idgs.model;
 
+import java.util.Date;
+import org.apache.commons.codec.digest.DigestUtils;
+
 /**
  *
  * @author Alda
@@ -12,19 +15,26 @@ public class Usuario {
     private String rol;
     private int estatus;
     private String logsUser;
+    private String lastToken;
+    private String dateLastToken;
 
-    public Usuario(int idUsuario, String nombreUsuario, String contrasenia, String rol, int estatus, String logsUser) {
+
+    public Usuario() {
+    }
+
+    public Usuario(int idUsuario, String nombreUsuario, String contrasenia, String rol, int estatus, String logsUser, String lastToken, String dateLastToken) {
         this.idUsuario = idUsuario;
         this.nombreUsuario = nombreUsuario;
         this.contrasenia = contrasenia;
         this.rol = rol;
         this.estatus = estatus;
         this.logsUser = logsUser;
+        this.lastToken = lastToken;
+        this.dateLastToken = dateLastToken;
     }
-
-    public Usuario() {
-    }
-
+    
+    
+    
     public int getIdUsuario() {
         return idUsuario;
     }
@@ -78,4 +88,27 @@ public class Usuario {
         return "Usuario{" + "idUsuario=" + idUsuario + ", nombreUsuario=" + nombreUsuario + ", contrasenia=" + contrasenia + ", rol=" + rol + ", estatus=" + estatus + ", logsUser=" + logsUser + '}';
     }
 
+    public String getLastToken() {
+        return lastToken;
+    }
+
+    public void setLastToken(String lastToken) {
+        this.lastToken = lastToken;
+    }
+
+    public String getDateLastToken() {
+        return dateLastToken;
+    }
+
+    public void setDateLastToken(String dateLastToken) {
+        this.dateLastToken = dateLastToken;
+    }
+      public void setLastToken() {
+    String u = this.getNombreUsuario();
+    String p = this.getContrasenia();
+    String k = new Date().toString();
+    String x = (DigestUtils.sha256Hex(u + ";" + p + ";" + k));
+    this.lastToken = x;
+    this.dateLastToken = k; // Guardar la fecha de creación del token
+}
 }

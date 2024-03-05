@@ -21,6 +21,11 @@ CREATE TABLE usuario(
     estatus				INT NOT NULL DEFAULT 1							-- 5
 );
 
+ALTER TABLE usuario
+ADD COLUMN lastToken VARCHAR(65) NOT NULL DEFAULT '',
+ADD COLUMN dateLastToken DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+
 drop table if exists logsUser;
 CREATE TABLE IF NOT EXISTS logsUser (
     id 				INT AUTO_INCREMENT PRIMARY KEY,

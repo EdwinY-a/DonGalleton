@@ -24,7 +24,8 @@ CREATE PROCEDURE insertarUsuario(
                                 IN 	var_rol					VARCHAR(30),		-- 3
                                 IN  var_logs				VARCHAR(50),
     
-								OUT	var_idUsuario			INT					-- 4
+								OUT	var_idUsuario			INT,			-- 4
+
 )
 BEGIN
 	declare prodecimiento VARCHAR(50);
@@ -38,6 +39,37 @@ BEGIN
 				VALUES (var_logs, prodecimiento);
 END $$
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS generarToken;
+DELIMITER $$
+CREATE PROCEDURE generarToken(
+							IN var_idUsuario INT,
+                            IN var_token VARCHAR(65))
+						BEGIN
+                        UPDATE usuario SET lastToken = var_token,
+                        dateLastToken = CURRENT_TIMESTAMP
+					WHERE idUsuario=var_idUsuario;
+				END
+$$
+DELIMITER ;
+
+-- Stored Procedure para generar nuevos tokens de Empleados.
+DROP PROCEDURE IF EXISTS generarNuevoTokenEmpleado;
+DELIMITER $$
+CREATE PROCEDURE generarNuevoTokenEmpleado(IN  var_idUsuario INT, 
+                                           OUT var_lastToken VARCHAR(65), 
+                                           OUT var_dateLastToken VARCHAR(25))
+    BEGIN        
+        -- Comenzamos generando el nuevo Token:        
+        SET var_lastToken = MD5(CONCAT('UUID-', var_idUsuario, '-', CAST(UNIX_TIMESTAMP() AS CHAR)));
+        
+        -- Actualizamos la tabla de usuarios:
+        SET var_dateLastToken = NOW();
+        UPDATE usuario SET lastToken = var_lastToken, dateLastToken = var_dateLastToken WHERE idUsuario = var_idUsuario;
+    END
+$$
+DELIMITER ;
+
 
 CALL insertarUsuario('EdwinRive', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'admin', 'EdwinRive', @idUsuarioCreado);
 

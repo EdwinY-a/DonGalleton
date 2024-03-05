@@ -118,3 +118,44 @@ $(document).ready(function(){
         entrar();
     });
 });
+
+function cerrarSesion() {
+  mostrarCargando();
+  let us = sessionStorage.getItem('currentUser');
+  let usuario = { "usuario": us };
+  
+  let params = new URLSearchParams(usuario);
+
+  fetch("../../api/log/out", {
+    method: "POST",
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: params
+  })
+    .then(response => {
+      return response.json();
+    })
+    .then(function (data) {
+      if (data.exception) {
+        Swal.fire('', 'Error interno del servidor. Intente nuevamente más tarde.', 'error');
+        return;
+      }
+      if (data.error) {
+        Swal.fire('', data.error, 'warning');
+        return;
+      } else {
+        Swal.fire('', 'Sesión cerrada con éxito', 'success');
+        sessionStorage.removeItem('currentUser');
+        window.location.replace('../../index.html');
+      }
+    })
+    .catch(error => {
+      console.error('Error al cerrar sesión:', error);
+      Swal.fire('', 'Error al cerrar sesión. Intente nuevamente más tarde.', 'error');
+    });
+}
+
+
+$("#cerrarSesion").click(function(){
+    cerrarSesion();
+});
+
