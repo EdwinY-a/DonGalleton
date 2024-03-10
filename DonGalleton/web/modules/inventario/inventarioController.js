@@ -3,6 +3,40 @@ let logsUsuario = currentUser.nombreUsuario;
 
 export function inicializar() {
     getAll();
+    getUser();
+}
+
+function getUser(){
+    let usuario = new Object();
+    let datos = null;
+    let params = null;
+    usuario.idUsuario = currentUser.idUsuario;
+    datos = {
+        datoUsuario: JSON.stringify(usuario) 
+        };
+
+    params = new URLSearchParams(datos);
+    $.ajax({
+    url:"../../api/log/getUsuario",
+    type: "POST",
+    data: params.toString(),
+    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+    success: function(response){
+        let data = response;
+        if(data.error){
+            Swal.fire('', data.error, 'warning');
+        } else if(data.exception){
+            Swal.fire('', "Error interno del servidor. Intente mas tarde.", 'error');
+            
+        } else{            
+            if (data.rol !== "admin") {
+                console.log('ENTRO');
+                $("#btnEliminar").remove();
+                $("#btnEditar").remove();
+            }
+        }
+    }
+});
 }
 
 export function guardarMateriaPrima() {
@@ -232,7 +266,7 @@ export function cargarTabla(data) {
         <td>${fechaCompraSubstring}</td>
         <td>${fechaVencimientoSubstring}</td>
         <td>${porcentajeConSigno}</td>
-        <td><button data-idmateriaprima="${data[i]['idMateriaPrima']}" class="btnEliminar"><i class="fa-solid fa-trash" style="color: #c12525;"></i></button></td>
+        <td><button data-idmateriaprima="${data[i]['idMateriaPrima']}"id="btnEliminar" class="btnEliminar"><i class="fa-solid fa-trash" style="color: #c12525;"></i></button></td>
         <td><button data-idmateriaprima="${data[i]['idMateriaPrima']}" id="btnEditar" class="btnEditar"><i class="fa-solid fa-pen-to-square" style="color: #57351f;"></i></button></td>
     </tr>`;
 
@@ -271,17 +305,6 @@ export function cargarTabla(data) {
         "ordering": false,
         retrieve: true
     });
-    var currentUserData = sessionStorage.getItem('currentUser');
-    var currentUser = JSON.parse(currentUserData);
-
-    if (currentUser['rol'] === 'administrador') {
-        $('.btnEliminar').show();
-        $('.btnEditar').show();
-    } else {
-        $('.btnEliminar').hide();
-        $('.btnEditar').hide();
-    }
-
 
     $('#agregarMaterialPrima').on('click', 'button', function () {
         $('#modalMaterialPrima').modal('show');
