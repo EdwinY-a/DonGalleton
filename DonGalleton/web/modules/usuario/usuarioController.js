@@ -6,6 +6,43 @@ export function inicializar() {
     ocultarContrasenia();
 }
 
+$(document).ready(function() {
+    getUser();
+    
+});
+
+function getUser(){
+    let usuario = new Object();
+    let datos = null;
+    let params = null;
+    usuario.idUsuario = currentUser.idUsuario;
+    datos = {
+        datoUsuario: JSON.stringify(usuario) 
+        };
+
+    params = new URLSearchParams(datos);
+    $.ajax({
+    url:"../../api/log/getUsuario",
+    type: "POST",
+    data: params.toString(),
+    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+    success: function(response){
+        let data = response;
+        if(data.error){
+            Swal.fire('', data.error, 'warning');
+        } else if(data.exception){
+            Swal.fire('', "Error interno del servidor. Intente mas tarde.", 'error');
+            
+        } else{            
+            if (data.rol !== "admin") {
+                console.log('ENTRO');
+                $("#bodyTabla").remove();
+            }
+        }
+    }
+});
+}
+
 export function guardarUsuario() {
 
     let datos = null;
@@ -320,13 +357,6 @@ export function cargarTabla(data) {
     var currentUserData = sessionStorage.getItem('currentUser');
     var currentUser = JSON.parse(currentUserData);    
 
-    if (currentUser['rol'] === 'administrador') {
-        $('.btnEliminar').show();
-        $('.btnEditar').show();
-    } else {
-        $('.btnEliminar').hide();
-        $('.btnEditar').hide();
-    }
 
     $('#agregarUsuario').on('click', 'button', function () {
         $('#modalUsuario').modal('show');
@@ -465,7 +495,7 @@ function getUsuario(idUsuario) {
                 }
 
 
-                console.log(data);
+                console.log('data: '+data);
                 document.getElementById("txtNombreEditar").value = data['nombreUsuario'];
                 document.getElementById("txtContraseñaEditar").value = data['contrasenia'];
                 document.getElementById("txtRolEditar").value = data['rol'];
