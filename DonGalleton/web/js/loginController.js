@@ -87,6 +87,11 @@ $(document).ready(function () {
 
         let usuario = await sanitizar($("#idUsuario").val());
         let contrasenia = await sanitizar($("#idPassword").val());
+        
+        if (usuario === contrasenia) {
+            Swal.fire('', 'No pueden ser igual Usuario y Contraseña', 'warning');
+            return;
+        }
         if (!validarContraseña(contrasenia)) {
             Swal.fire('', 'Dato Incorrecto.', 'warning');
             return;

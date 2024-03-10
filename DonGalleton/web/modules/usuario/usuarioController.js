@@ -67,7 +67,11 @@ export function guardarUsuario() {
         if (usuario.nombreUsuario === "" || usuario.contrasenia === "" || usuario.rol === "") {
         Swal.fire('', 'Por favor, complete todos los campos (correo electrónico, contraseña o rol) para guardar el usuario.', 'warning');
         return;
-    }
+        }
+        if (usuario.nombreUsuario === usuario.contrasenia) {
+            Swal.fire('', 'No pueden ser igual Usuario y Contraseña', 'warning');
+            return;
+        }
         usuario.logsUser = logsUsuario;
         
         datos = {
