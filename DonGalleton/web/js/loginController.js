@@ -67,9 +67,23 @@ $(document).ready(function(){
         $("#idUsuario").val("");
         $("#idPassword").val("");
     }
+    let intentosFallidos = 0;
+    const bloqueoDuracion = 1 * 60 * 1000;
+    
+    function reiniciarIntentosFallidos() {
+        setTimeout(() => {
+            intentosFallidos = 0;
+        }, bloqueoDuracion);
+    }
     
     async function entrar(){
+        console.log(intentosFallidos);
         mostrarCargando();
+        if (intentosFallidos >= 3) {
+            Swal.fire('', 'Ha excedido el número máximo de intentos de inicio de sesión. Intente nuevamente más tarde.', 'error');
+            ocultarCargando();
+            return;
+        }
         
         let usuario = await sanitizar($("#idUsuario").val());
         let contrasenia = await sanitizar($("#idPassword").val());
@@ -78,8 +92,6 @@ $(document).ready(function(){
                 .then((textoEncriptado) => {
                     let datos = JSON.stringify({nombreUsuario: usuario, contrasenia: textoEncriptado});
                     let params = new URLSearchParams({datos: datos});
-                    console.log(datos);
-                    console.log(params);
                     
                     $.ajax({
                         url: "api/log/in",
@@ -90,6 +102,7 @@ $(document).ready(function(){
                             let data = response;
                             
                             if(data.error){
+                                intentosFallidos++;
                                 Swal.fire('', data.error, 'warning');
                                 ocultarCargando();
                                 activarAyudas();
@@ -100,11 +113,14 @@ $(document).ready(function(){
                                 activarAyudas();
                                 limpiar();
                             } else{
-                                Swal.fire('', "Bienvenido " + usuario, 'success');
+                                intentosFallidos = 0;
+                                ocultarCargando();
+                                 Swal.fire('', "Bienvenido " + data.nombreUsuario, 'success');
                                 sessionStorage.setItem('currentUser', JSON.stringify(data));
                                 ocultarCargando();
-                                window.location.replace("modules/main/vista_main.html");
+                                window.location.replace("modules/main/vista_main.html");  
                             }
+                            reiniciarIntentosFallidos();
                         }
                     });
         });
