@@ -23,6 +23,12 @@ import java.util.Set;
 
 @Path("log")
 public class RESTUsuario {
+    private static final Set<String> ALLOWED_IPS = new HashSet<>();
+    static {
+        ALLOWED_IPS.add("127.0.0.1"); 
+        // ALLOWED_IPS.add("192.168.137.227"); 
+    }
+
     @Path("in")
     @Produces(MediaType.APPLICATION_JSON)
     @POST
@@ -54,12 +60,6 @@ public class RESTUsuario {
                 out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
             } else {
                 if (u.getEstatus() == 1) {
-                        //Al objeto emp se ejecuta el metodo settoken donde crea el token
-                u.setLastToken();
-                System.out.println("Token "+u.getLastToken());
-                //Usamos el metodo generar token del controller para asignarle el token al usuario en la base de datos
-                cu.generarToken(u.getIdUsuario(), u.getLastToken());
-                
                     out = gson.toJson(u);
                 } else {
                     out = "{\"error\": \"El usuario está inactivo.\"}";
@@ -70,20 +70,14 @@ public class RESTUsuario {
             out = "{\"exception\": \"" + ex.getMessage() + "\"}";
         }
         
-//        // Verificar la dirección IP
-//        String clientIP = request.getRemoteAddr();
-//        System.out.println("Dirección IP del cliente: " + clientIP);
-//
-//        if (!ALLOWED_IPS.contains(clientIP)) {
-//        return Response.status(Response.Status.FORBIDDEN).entity("{\"error\": \"Acceso no autorizado desde esta dirección IP.\"}").build();
-//}
+        String clientIP = request.getRemoteAddr();
+        if (!ALLOWED_IPS.contains(clientIP)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("{\"error\": \"Acceso no autorizado desde esta dirección IP.\"}").build();
+        }
 
         return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
     }
-    
-
   
-// Función logOut en tu servicio REST
 @POST
 @Produces(MediaType.APPLICATION_JSON)
 @Path("out")
@@ -173,7 +167,7 @@ public Response logOut(@FormParam("usuario") @DefaultValue("") String u) throws 
                   {"exception":"Formato JSON de Datos Incorrectos."}
                   """;
         }
-        catch (Exception e) //Cualquier otra excpetion
+        catch (Exception e)
         {
             e.printStackTrace();
             out ="""
@@ -236,60 +230,5 @@ public Response logOut(@FormParam("usuario") @DefaultValue("") String u) throws 
         return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
 
     }
-//@Path("log")
-//public class RESTUsuario {
-////    private static final Set<String> ALLOWED_IPS = new HashSet<>();
-////    static {
-////        //ALLOWED_IPS.add("192.168.137.196"); //Jorge
-////        //ALLOWED_IPS.add("192.168.137.227"); //Diego
-////    }
-////
-////    @Path("in")
-////    @Produces(MediaType.APPLICATION_JSON)
-////    @POST
-////    public Response login(@Context HttpServletRequest request, @FormParam("datos") String datos) throws Exception {
-////        String out = null;
-////        Gson gson = new Gson();
-////        Usuario u = new Usuario();
-////        ControllerUsuario cu = new ControllerUsuario();
-////        
-////        try {
-////            u = gson.fromJson(datos, Usuario.class);
-////
-////            if (u == null) {
-////                out = "{\"error\": \"Debe ingresar usuario y contraseña para continuar.\"}";
-////                return Response.status(Response.Status.OK).entity(out).build();
-////            }
-////            if (u.getNombreUsuario() == null || u.getNombreUsuario().isEmpty()) {
-////                out = "{\"error\": \"Ingrese su nombre de usuario para continuar.\"}";
-////                return Response.status(Response.Status.OK).entity(out).build();
-////            }
-////            if (u.getContrasenia() == null || u.getContrasenia().isEmpty()) {
-////                out = "{\"error\": \"Ingrese su contraseña para continuar.\"}";
-////                return Response.status(Response.Status.OK).entity(out).build();
-////            }
-////
-////            u = cu.login(u.getNombreUsuario(), u.getContrasenia());
-////
-////            if (u == null) {
-////                out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
-////            } else {
-////                if (u.getEstatus() == 1) {
-////                    out = gson.toJson(u);
-////                } else {
-////                    out = "{\"error\": \"El usuario está inactivo.\"}";
-////                }
-////            }
-////        } catch (Exception ex) {
-////            ex.printStackTrace();
-////            out = "{\"exception\": \"" + ex.getMessage() + "\"}";
-////        }
-////        
-////        String clientIP = request.getRemoteAddr();
-////        if (!ALLOWED_IPS.contains(clientIP)) {
-////            return Response.status(Response.Status.FORBIDDEN).entity("{\"error\": \"Acceso no autorizado desde esta dirección IP.\"}").build();
-////        }
-//
-//        return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
-//    }
+
 }
