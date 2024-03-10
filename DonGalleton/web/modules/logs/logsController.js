@@ -1,6 +1,44 @@
+let currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+let logsUsuario = currentUser.nombreUsuario;
+console.log(currentUser);
+
 export function inicializar() {
     getAll();
+    getUser();
 }
+
+function getUser(){
+    let usuario = new Object();
+    let datos = null;
+    let params = null;
+    usuario.idUsuario = currentUser.idUsuario;
+    datos = {
+        datoUsuario: JSON.stringify(usuario) 
+        };
+
+    params = new URLSearchParams(datos);
+    $.ajax({
+    url:"../../api/log/getUsuario",
+    type: "POST",
+    data: params.toString(),
+    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+    success: function(response){
+        let data = response;
+        if(data.error){
+            Swal.fire('', data.error, 'warning');
+        } else if(data.exception){
+            Swal.fire('', "Error interno del servidor. Intente mas tarde.", 'error');
+            
+        } else{            
+            if (data.rol !== "admin") {
+                console.log('ENTRO');
+                $("#bodyTabla").remove();
+            }
+        }
+    }
+});
+}
+
 
 export function cargarTabla(data) {
     console.log(data);
