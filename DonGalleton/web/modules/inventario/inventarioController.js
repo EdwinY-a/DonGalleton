@@ -30,7 +30,9 @@ function getUser(){
             
         } else{            
             if (data.rol !== "admin") {
-                console.log('ENTRO');
+                if (typeof data.lastToken === 'undefined'){
+                    window.location.replace('../../index.html');
+                }
                 $("#btnEliminar").remove();
                 $("#btnEditar").remove();
             }
