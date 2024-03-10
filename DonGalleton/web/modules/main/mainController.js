@@ -5,10 +5,49 @@ let moduloInventario;
 let moduloUsuario;
 let moduloLogs;
 
-function inicializar(){
-    cargarModuloPuntoDeVenta();
+let currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+if (currentUser !== null){
+    let logsUsuario = currentUser.nombreUsuario;
 }
 
+function inicializar(){
+    cargarModuloPuntoDeVenta();
+    getUser();
+}
+
+function getUser(){
+    let usuario = new Object();
+    let datos = null;
+    let params = null;
+    if (currentUser === null){
+        currentUser = '';
+    }
+    usuario.idUsuario = currentUser.idUsuario;
+    datos = {
+        datoUsuario: JSON.stringify(usuario) 
+        };
+
+    params = new URLSearchParams(datos);
+    $.ajax({
+    url:"../../api/log/getUsuario",
+    type: "POST",
+    data: params.toString(),
+    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+    success: function(response){
+        let data = response;
+        if(data.error){
+            Swal.fire('', data.error, 'warning');
+        } else if(data.exception){
+            Swal.fire('', "Error interno del servidor. Intente mas tarde.", 'error');
+            
+        } else{            
+            if (typeof data.lastToken === 'undefined'){
+                window.location.replace('../../index.html');
+            }
+        }
+    }
+});
+}
 // Aqui van las funciones que mandan a llamar a las vistas solamente
 
 function mostrarCargando(){
