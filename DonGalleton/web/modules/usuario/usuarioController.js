@@ -60,7 +60,10 @@ export function guardarUsuario() {
         usuario.nombreUsuario = sanitizar(document.getElementById("txtNombre").value);
         usuario.contrasenia = sanitizar(document.getElementById("txtContraseña").value);
         usuario.rol = sanitizar(document.getElementById("txtRol").value);
-        
+        if (usuario.nombreUsuario === "" || usuario.contrasenia === "" || usuario.rol === "") {
+        Swal.fire('', 'Por favor, complete todos los campos (correo electrónico, contraseña o rol) para guardar el usuario.', 'warning');
+        return;
+    }
         usuario.logsUser = logsUsuario;
         
         datos = {
@@ -111,6 +114,10 @@ export function guardarUsuario() {
         usuario.nombreUsuario = sanitizar(document.getElementById("txtNombreEditar").value);
         usuario.contrasenia = sanitizar(document.getElementById("txtContraseñaEditar").value);
         usuario.rol = sanitizar(document.getElementById("txtRolEditar").value);
+        if (usuario.nombreUsuario === "" || usuario.contrasenia === "" || usuario.rol === "") {
+        Swal.fire('', 'Por favor, complete todos los campos (correo electrónico, contraseña o rol) para guardar el usuario.', 'warning');
+        return;
+    }
         usuario.logsUser = logsUsuario;
 
         datos = {

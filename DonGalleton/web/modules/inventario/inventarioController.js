@@ -61,7 +61,12 @@ export function guardarMateriaPrima() {
         materiaPrima.precioCompra = document.getElementById("txtPrecioCompra").value;
         materiaPrima.porcentaje = document.getElementById("txtPorcentajeMaterial").value;
         materiaPrima.medida.idMedida = document.getElementById("txtMedidaMaterial").value;
-        
+        if (materiaPrima.nombreMateria === "" || materiaPrima.fechaCompra === "" ||
+                materiaPrima.fechaVencimiento === "" || materiaPrima.cantidadExistentes === "" ||
+                materiaPrima.precioCompra === "" || materiaPrima.porcentaje === "" || materiaPrima.medida.idMedida === "") {
+            Swal.fire('', 'Por favor, complete todos los campos para guardar el material prima.', 'warning');
+            return;
+        }
          
         let usu = currentUser;
         if (usu == null) {
@@ -124,7 +129,12 @@ export function guardarMateriaPrima() {
         materiaPrima.precioCompra = document.getElementById("txtPrecioCompraEditar").value;
         materiaPrima.porcentaje = document.getElementById("txtPorcentajeMaterialEditar").value;
         materiaPrima.medida.idMedida = document.getElementById("txtMedidaMaterialEditar").value;
-        
+        if (materiaPrima.nombreMateria === "" || materiaPrima.fechaCompra === "" ||
+                materiaPrima.fechaVencimiento === "" || materiaPrima.cantidadExistentes === "" ||
+                materiaPrima.precioCompra === "" || materiaPrima.porcentaje === "" || materiaPrima.medida.idMedida === "") {
+            Swal.fire('', 'Por favor, complete todos los campos para guardar el material prima.', 'warning');
+            return;
+        }
          
         let usu = currentUser;
         if (usu == null) {
