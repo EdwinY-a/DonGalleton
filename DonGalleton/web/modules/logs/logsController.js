@@ -29,7 +29,11 @@ function getUser(){
         } else if(data.exception){
             Swal.fire('', "Error interno del servidor. Intente mas tarde.", 'error');
             
-        } else{            
+        } else{   
+            if (typeof data.lastToken === 'undefined'){
+                window.location.replace('../../index.html');
+            }
+            
             if (data.rol !== "admin") {
                 console.log('ENTRO');
                 $("#bodyTabla").remove();

@@ -60,6 +60,11 @@ public class RESTUsuario {
                 out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
             } else {
                 if (u.getEstatus() == 1) {
+                     //Al objeto emp se ejecuta el metodo settoken donde crea el token
+                u.setLastToken();
+                System.out.println("Token "+u.getLastToken());
+                //Usamos el metodo generar token del controller para asignarle el token al usuario en la base de datos
+                cu.generarToken(u.getIdUsuario(), u.getLastToken());
                     out = gson.toJson(u);
                 } else {
                     out = "{\"error\": \"El usuario está inactivo.\"}";
