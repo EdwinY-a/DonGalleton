@@ -123,14 +123,50 @@ $(document).ready(function () {
                                     activarAyudas();
                                     limpiar();
                                 } else {
-                                    intentosFallidos = 0;
-                                    ocultarCargando();
-                                    Swal.fire('', "Bienvenido " + data.nombreUsuario, 'success');
-                                    sessionStorage.setItem('currentUser', JSON.stringify(data));
-                                    ocultarCargando();
-                                    window.location.replace("modules/main/vista_main.html");
+                                console.log(data);
+                                
+                                intentosFallidos = 0;
+                                ocultarCargando();
+                                Swal.fire('', "Bienvenido " + data.nombreUsuario, 'success');
+                                sessionStorage.setItem('currentUser', JSON.stringify(data));
+                                ocultarCargando();
+                                Swal.fire({
+                                title: "Inserta tu código de verificación",
+                                input: "text",
+                                inputAttributes: {
+                                  autocapitalize: "off"
+                                },
+                                showCancelButton: true,
+                                confirmButtonText: "Enviar",
+                                showLoaderOnConfirm: true,
+                                preConfirm: async (codigo) => {
+                                    console.log(codigo);
+                                    let params = new URLSearchParams({codigo: codigo});
+                                    console.log(params);
+                                    $.ajax({
+                                        url: "api/log/verifCode",
+                                        type: "POST",
+                                        data: params.toString(),
+                                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                                        success: function(response){
+                                            console.log(response['response']);
+                                                if (response.response === "Correcto") {
+                                                    window.location.replace("modules/main/vista_main.html");  
+                                                }else{
+                                                    cerrarSesion1();
+                                                    Swal.fire({
+                                                        icon: "error",
+                                                        title: "Oops...",
+                                                        text: "Inicio de sesión incorrecto.",
+                                                      });
+                                                }
+                                        },
+                                        error: function(error){
+                                            console.log(error);
+                                        }
+                                    });
                                 }
-                                reiniciarIntentosFallidos();
+                              });
                             }
                         });
                     });
@@ -205,6 +241,40 @@ function cerrarSesion() {
             });
 }
 
+
+function cerrarSesion1() {
+  let us = sessionStorage.getItem('currentUser');
+  console.log(us);
+  let usuario = { "usuario": us };
+  
+  let params = new URLSearchParams(usuario);
+
+  fetch("api/log/out", {
+    method: "POST",
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: params
+  })
+    .then(response => {
+      return response.json();
+    })
+    .then(function (data) {
+      if (data.exception) {
+        Swal.fire('', 'Error interno del servidor. Intente nuevamente más tarde.', 'error');
+        return;
+      }
+      if (data.error) {
+        Swal.fire('', data.error, 'warning');
+        return;
+      } else {
+        sessionStorage.removeItem('currentUser');
+        window.location.replace('index.html');
+      }
+    })
+    .catch(error => {
+      console.error('Error al cerrar sesión:', error);
+      Swal.fire('', 'Error al cerrar sesión. Intente nuevamente más tarde.', 'error');
+    });
+}
 
 $("#cerrarSesion").click(function () {
     cerrarSesion();
