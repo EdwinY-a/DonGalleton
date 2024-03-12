@@ -21,14 +21,52 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
+import java.util.Random;
+
+
 @Path("log")
 public class RESTUsuario {
+    private static String CODE_VERIF = null;
+    public static final String ACCOUNT_SID = "ACbf3cb0cc4b01773961bf588245fdfa3b";
+    public static final String AUTH_TOKEN = "ce6d2af16e4af12567fa93e3cb2ad887";
+
+    static {
+        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+    }
+    
     private static final Set<String> ALLOWED_IPS = new HashSet<>();
     static {
         ALLOWED_IPS.add("127.0.0.1"); 
         // ALLOWED_IPS.add("192.168.137.227"); 
     }
+    
+    @Path("verifCode")
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public Response verifCode( @FormParam("codigo") String codigo) throws Exception {
+        String out = null;
+        String code = null;
+        Gson gson = new Gson();
+        
+        try {
+            System.out.println("CODIGOOO: "+CODE_VERIF);
+            if (CODE_VERIF.equals(codigo)){
+                System.out.println("CORRECTO");
+                out = "{\"response\": \"Correcto\"}";
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            out = "{\"exception\": \"" + ex.getMessage() + "\"}";
+        }
+        
+       
 
+        return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
+    }
+    
     @Path("in")
     @Produces(MediaType.APPLICATION_JSON)
     @POST
@@ -37,10 +75,11 @@ public class RESTUsuario {
         Gson gson = new Gson();
         Usuario u = new Usuario();
         ControllerUsuario cu = new ControllerUsuario();
+        String code = null;
         
         try {
             u = gson.fromJson(datos, Usuario.class);
-
+            System.out.println("USUARIO:"+ u);
             if (u == null) {
                 out = "{\"error\": \"Debe ingresar usuario y contraseña para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
@@ -53,18 +92,21 @@ public class RESTUsuario {
                 out = "{\"error\": \"Ingrese su contraseña para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
-
+            CODE_VERIF = generarCodigo();
             u = cu.login(u.getNombreUsuario(), u.getContrasenia());
+            System.out.println("TELEFONO2"+ u.getTelefono());
+            //enviarMensajeTexto(u.getTelefono(), CODE_VERIF);
 
             if (u == null) {
                 out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
             } else {
                 if (u.getEstatus() == 1) {
-                     //Al objeto emp se ejecuta el metodo settoken donde crea el token
-                u.setLastToken();
-                System.out.println("Token "+u.getLastToken());
-                //Usamos el metodo generar token del controller para asignarle el token al usuario en la base de datos
-                cu.generarToken(u.getIdUsuario(), u.getLastToken());
+                                        
+                    //Al objeto emp se ejecuta el metodo settoken donde crea el token
+                    u.setLastToken();
+                    System.out.println("Token "+u.getLastToken());
+                    //Usamos el metodo generar token del controller para asignarle el token al usuario en la base de datos
+                    cu.generarToken(u.getIdUsuario(), u.getLastToken());
                     out = gson.toJson(u);
                 } else {
                     out = "{\"error\": \"El usuario está inactivo.\"}";
@@ -234,6 +276,24 @@ public Response logOut(@FormParam("usuario") @DefaultValue("") String u) throws 
         }
         return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
 
+    }
+    
+    // Método para enviar mensajes de texto
+    private void enviarMensajeTexto(String telefono, String mensaje) {
+        Message message = Message.creator(
+                new PhoneNumber(telefono), // Tu número de Twilio
+                new PhoneNumber("+13392367606"), // Tu número de Twilio
+                
+                mensaje)
+            .create();
+
+        System.out.println("Mensaje SID: " + message.getSid());
+    }
+    
+    private String generarCodigo() {
+        Random random = new Random();
+        int codigo = 100000 + random.nextInt(900000);
+        return String.valueOf(codigo);
     }
 
 }
