@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  *
- * @author Alda
+ * @author Jorge
  */
 public class ControllerUsuario {
     public Usuario login(String usuario, String contrasenia) throws SQLException{
@@ -169,10 +169,10 @@ public class ControllerUsuario {
         u.setNombreUsuario(rs.getString("nombreUsuario"));
         u.setContrasenia(rs.getString("contrasenia"));
         u.setRol(rs.getString("rol"));
+        u.setTelefono(rs.getString("telefono"));
         u.setLastToken(rs.getString("lastToken"));
         u.setDateLastToken(rs.getString("dateLastToken"));
         u.setEstatus(rs.getInt("estatus"));
-        
         return u;
     }
     
@@ -256,7 +256,5 @@ public class ControllerUsuario {
         connection.close();
         connMySQL.close();
         return r;
-    }
-   
-
+    }  
 }
