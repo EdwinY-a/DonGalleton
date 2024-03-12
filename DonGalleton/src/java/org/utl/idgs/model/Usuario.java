@@ -6,7 +6,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  *
- * @author Alda
+ * @author Jorge
  */
 public class Usuario {
     private int idUsuario;
@@ -15,6 +15,7 @@ public class Usuario {
     private String rol;
     private int estatus;
     private String logsUser;
+    private String telefono;
     private String lastToken;
     private String dateLastToken;
 
@@ -22,18 +23,25 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(int idUsuario, String nombreUsuario, String contrasenia, String rol, int estatus, String logsUser, String lastToken, String dateLastToken) {
+    public Usuario(int idUsuario, String nombreUsuario, String contrasenia, String rol, int estatus, String logsUser, String telefono, String lastToken, String dateLastToken) {
         this.idUsuario = idUsuario;
         this.nombreUsuario = nombreUsuario;
         this.contrasenia = contrasenia;
         this.rol = rol;
         this.estatus = estatus;
         this.logsUser = logsUser;
+        this.telefono = telefono;
         this.lastToken = lastToken;
         this.dateLastToken = dateLastToken;
     }
-    
-    
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }   
     
     public int getIdUsuario() {
         return idUsuario;
