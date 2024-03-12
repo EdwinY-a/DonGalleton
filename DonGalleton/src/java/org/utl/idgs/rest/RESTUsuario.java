@@ -14,8 +14,16 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import org.utl.idgs.core.ControllerUsuario;
 import org.utl.idgs.model.Usuario;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,10 +31,23 @@ import java.util.Set;
 
 @Path("log")
 public class RESTUsuario {
+
     private static final Set<String> ALLOWED_IPS = new HashSet<>();
+
     static {
-        ALLOWED_IPS.add("127.0.0.1"); 
-        // ALLOWED_IPS.add("192.168.137.227"); 
+        ALLOWED_IPS.add("127.0.0.1");
+        //ALLOWED_IPS.add("192.168.137.72");
+    }
+
+    private static String encrypt(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes());
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Path("in")
@@ -37,7 +58,8 @@ public class RESTUsuario {
         Gson gson = new Gson();
         Usuario u = new Usuario();
         ControllerUsuario cu = new ControllerUsuario();
-        
+        String textoEncriptado = "";
+
         try {
             u = gson.fromJson(datos, Usuario.class);
 
@@ -49,22 +71,22 @@ public class RESTUsuario {
                 out = "{\"error\": \"Ingrese su nombre de usuario para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
-            if (u.getContrasenia() == null || u.getContrasenia().isEmpty()) {
+            if (encrypt(u.getContrasenia()) == null || encrypt(u.getContrasenia()).isEmpty()) {
                 out = "{\"error\": \"Ingrese su contraseña para continuar.\"}";
                 return Response.status(Response.Status.OK).entity(out).build();
             }
 
-            u = cu.login(u.getNombreUsuario(), u.getContrasenia());
+            System.out.println("CONTRASEÑA ------ ---" + encrypt(u.getContrasenia()) + " ------ ----------");
+            textoEncriptado = encrypt(u.getContrasenia());
+            u = cu.login(u.getNombreUsuario(), textoEncriptado);
 
             if (u == null) {
                 out = "{\"error\": \"Usuario no encontrado, revise su usuario y contraseña.\"}";
             } else {
                 if (u.getEstatus() == 1) {
-                     //Al objeto emp se ejecuta el metodo settoken donde crea el token
-                u.setLastToken();
-                System.out.println("Token "+u.getLastToken());
-                //Usamos el metodo generar token del controller para asignarle el token al usuario en la base de datos
-                cu.generarToken(u.getIdUsuario(), u.getLastToken());
+                    u.setLastToken();
+                    System.out.println("Token " + u.getLastToken());
+                    cu.generarToken(u.getIdUsuario(), u.getLastToken());
                     out = gson.toJson(u);
                 } else {
                     out = "{\"error\": \"El usuario está inactivo.\"}";
@@ -74,142 +96,141 @@ public class RESTUsuario {
             ex.printStackTrace();
             out = "{\"exception\": \"" + ex.getMessage() + "\"}";
         }
-        
+
         String clientIP = request.getRemoteAddr();
         if (!ALLOWED_IPS.contains(clientIP)) {
+            registrarEventoSospechoso("Intento de acceso desde IP no autorizada: " + clientIP);
             return Response.status(Response.Status.FORBIDDEN).entity("{\"error\": \"Acceso no autorizado desde esta dirección IP.\"}").build();
         }
 
         return Response.status(Response.Status.OK).header("Access-Control-Allow-Origin", "*").entity(out).build();
     }
-  
-@POST
-@Produces(MediaType.APPLICATION_JSON)
-@Path("out")
-public Response logOut(@FormParam("usuario") @DefaultValue("") String u) throws Exception {
-    String out = null;
-    Usuario usu = null;
-    ControllerUsuario cu = new ControllerUsuario();
-    Gson gson = new Gson();
-    usu = gson.fromJson(u, Usuario.class);
 
-    try {
-        cu = new ControllerUsuario();
-        
-        if (cu.eliminarToken(usu)) {
-            out = "{\"ok\":\"Eliminación de Token Correcta\"}";
-        } else {
-            out = "{\"error\":\"Eliminación de token no realizada\"}";
+    private void registrarEventoSospechoso(String evento) {
+        System.out.println("EVENTO------------------ " + evento + " ------------------");
+
+        // Ruta completa del archivo en el que deseas escribir los eventos
+        String rutaArchivo = "C:\\Users\\Usuario\\Desktop\\DonGalleton\\DonGalleton\\src\\java\\org\\utl\\idgs\\rest\\eventos_sospechosos.txt";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaArchivo, true))) {
+            writer.write(evento);
+            writer.newLine();
+            System.out.println("Datos insertados correctamente en el archivo.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error al escribir en el archivo.");
         }
-        
-    } catch (JsonParseException jpe) {
-        out = "{\"error\":\"Eliminación no concedida\"}";
-        jpe.printStackTrace();
     }
-    
-    return Response.status(Response.Status.OK).entity(out).build();
-}
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("out")
+    public Response logOut(@FormParam("usuario") @DefaultValue("") String u) throws Exception {
+        String out = null;
+        Usuario usu = null;
+        ControllerUsuario cu = new ControllerUsuario();
+        Gson gson = new Gson();
+        usu = gson.fromJson(u, Usuario.class);
+
+        try {
+            cu = new ControllerUsuario();
+
+            if (cu.eliminarToken(usu)) {
+                out = "{\"ok\":\"Eliminación de Token Correcta\"}";
+            } else {
+                out = "{\"error\":\"Eliminación de token no realizada\"}";
+            }
+
+        } catch (JsonParseException jpe) {
+            out = "{\"error\":\"Eliminación no concedida\"}";
+            jpe.printStackTrace();
+        }
+
+        return Response.status(Response.Status.OK).entity(out).build();
+    }
 
     @Path("save")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response save(@FormParam("datosUsuario") @DefaultValue("") String datosUsuario)
-    {
+    public Response save(@FormParam("datosUsuario") @DefaultValue("") String datosUsuario) {
         String out = null;
         Gson gson = new Gson();
         Usuario user = null;
         ControllerUsuario cu = new ControllerUsuario();
-        
-        try 
-        {
+
+        try {
             user = gson.fromJson(datosUsuario, Usuario.class);
-            if (user.getIdUsuario()== 0)
-            {
+            if (user.getIdUsuario() == 0) {
                 cu.insertarUsuario(user);
-            }
-            else
-            {
+            } else {
                 cu.actualizarUsuario(user);
             }
             out = gson.toJson(user);
-        }
-        catch (JsonParseException jpe)
-        {
+        } catch (JsonParseException jpe) {
             jpe.printStackTrace();
             out = """
                   {"exception":"Formato JSON de Datos Incorrectos."}
                   """;
-        }
-        catch (Exception e) //Cualquier otra excpetion
+        } catch (Exception e) //Cualquier otra excpetion
         {
             e.printStackTrace();
-            out ="""
+            out = """
                  {"exception":"%s"}
                  """;
             out = String.format(out, e.toString());
         }
         return Response.status(Response.Status.OK).entity(out).build();
     }
-    
+
     @Path("getUsuario")
-    @POST 
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsuario(@FormParam("datoUsuario") @DefaultValue("") String datosUsuario){
+    public Response getUsuario(@FormParam("datoUsuario") @DefaultValue("") String datosUsuario) {
         String out = null;
         Gson gson = new Gson();
         Usuario u = null;
         ControllerUsuario cu = new ControllerUsuario();
-        try 
-        {
+        try {
             u = gson.fromJson(datosUsuario, Usuario.class);
             Usuario user = cu.getUsuario(u.getIdUsuario());
             out = gson.toJson(user);
-        }
-        catch (JsonParseException jpe)
-        {
+        } catch (JsonParseException jpe) {
             jpe.printStackTrace();
             out = """
                   {"exception":"Formato JSON de Datos Incorrectos."}
                   """;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-            out ="""
+            out = """
                  {"exception":"%s"}
                  """;
             out = String.format(out, e.toString());
         }
         return Response.status(Response.Status.OK).entity(out).build();
     }
-    
+
     @Path("delete")
-    @POST 
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response delete(@FormParam("datosUsuario") @DefaultValue("") String datosUsuario)
-    {
+    public Response delete(@FormParam("datosUsuario") @DefaultValue("") String datosUsuario) {
         String out = null;
         Gson gson = new Gson();
         Usuario u = null;
         ControllerUsuario cu = new ControllerUsuario();
-        
-        try 
-        {
+
+        try {
             u = gson.fromJson(datosUsuario, Usuario.class);
-            cu.desactivarUsuario(u.getIdUsuario(),u.getLogsUser());
+            cu.desactivarUsuario(u.getIdUsuario(), u.getLogsUser());
             out = gson.toJson(u);
-        }
-        catch (JsonParseException jpe)
-        {
+        } catch (JsonParseException jpe) {
             jpe.printStackTrace();
             out = """
                   {"exception":"Formato JSON de Datos Incorrectos."}
                   """;
-        }
-        catch (Exception e) //Cualquier otra excpetion
+        } catch (Exception e) //Cualquier otra excpetion
         {
             e.printStackTrace();
-            out ="""
+            out = """
                  {"exception":"%s"}
                  """;
             out = String.format(out, e.toString());

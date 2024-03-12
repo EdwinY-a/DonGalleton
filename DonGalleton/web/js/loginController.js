@@ -7,15 +7,9 @@
  °   Normalizar
  */
 
+
 $(document).ready(function () {
-    async function encriptar(texto) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(texto);
-        const hash = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hash));
-        const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-        return hashHex;
-    }
+
 
     async function sanitizar(texto) {
         for (var i = 0; i < texto.length; i++) {
@@ -87,7 +81,7 @@ $(document).ready(function () {
 
         let usuario = await sanitizar($("#idUsuario").val());
         let contrasenia = await sanitizar($("#idPassword").val());
-        
+
         if (usuario === contrasenia) {
             Swal.fire('', 'No pueden ser igual Usuario y Contraseña', 'warning');
             return;
@@ -97,12 +91,10 @@ $(document).ready(function () {
             return;
         } else {
 
-
-            encriptar(contrasenia)
-                    .then((textoEncriptado) => {
-                        let datos = JSON.stringify({nombreUsuario: usuario, contrasenia: textoEncriptado});
+                        
+                        let datos = JSON.stringify({nombreUsuario: usuario, contrasenia: contrasenia});
                         let params = new URLSearchParams({datos: datos});
-
+                        console.log(params);
                         $.ajax({
                             url: "api/log/in",
                             type: "POST",
@@ -133,7 +125,6 @@ $(document).ready(function () {
                                 reiniciarIntentosFallidos();
                             }
                         });
-                    });
         }
 
     }

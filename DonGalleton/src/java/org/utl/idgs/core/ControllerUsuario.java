@@ -1,6 +1,8 @@
 
 package org.utl.idgs.core;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import org.utl.idgs.connection.ConexionMySQL;
 import org.utl.idgs.model.Usuario;
@@ -11,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -44,12 +47,24 @@ public class ControllerUsuario {
         
         return u;
     }
-    
+    private static String encrypt(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes());
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public int insertarUsuario(Usuario usuario) throws Exception {
 
         String sql = "{call insertarUsuario(?, ?, ?,? ,?)}";
 
         int idUsuarioGenerado = -1;
+        String textoEncriptado="";
+        
+        textoEncriptado = encrypt(usuario.getContrasenia());
         ConexionMySQL connMySQL = new ConexionMySQL();
         
         Connection conn = connMySQL.open();
@@ -57,7 +72,7 @@ public class ControllerUsuario {
         CallableStatement cstmt = conn.prepareCall(sql);
 
         cstmt.setString(1, usuario.getNombreUsuario());
-        cstmt.setString(2, usuario.getContrasenia());
+        cstmt.setString(2, textoEncriptado);
         cstmt.setString(3, usuario.getRol());
         cstmt.setString(4, usuario.getLogsUser());
         System.out.println("LOGS " +usuario.getLogsUser());
