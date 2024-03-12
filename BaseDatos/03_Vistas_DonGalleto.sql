@@ -18,6 +18,7 @@ CREATE VIEW v_usuario AS
             ,u.rol				-- 4
             ,u.estatus,			-- 5
             u.lastToken,
+	    u.telefono,
             DATE_FORMAT(u.dateLastToken, '%d/%m/%Y %H:%i:%S') AS dateLastToken
     FROM	usuario u;
 select * from v_usuario;
